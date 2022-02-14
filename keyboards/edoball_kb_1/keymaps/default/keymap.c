@@ -142,7 +142,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    QWERTY, KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, \
    MYLCTL, KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,  \
    US2JP,  KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, KC_BSLS, \
-   ADJUST, KC_LCTL, KC_LGUI, KC_LALT, LT_RS ,  LT_LE,   KC_CAPS, LT_RE,   LT_LS,   KC_BSPC, KC_RALT, KC_DEL,  KC_MINS, KC_EQL   \
+   ADJUST, KC_LCTL, KC_LGUI, KC_LALT, KC_CAPS, LT_RS,   LT_LE,   LT_RE,   LT_LS,   KC_BSPC, KC_RALT, KC_DEL,  KC_MINS, KC_EQL   \
 ),
 
 [_EMACS] = LAYOUT( \
@@ -150,7 +150,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    QWERTY, KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, \
    KC_LCTL,MYLCTL,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,  \
    US2JP,  KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, KC_BSLS, \
-   ADJUST, KC_LCTL, KC_LGUI, KC_LALT, LT_RS ,  LT_LE,   KC_CAPS, LT_RE,   LT_LS,   KC_BSPC, KC_RALT, KC_DEL,  KC_MINS, KC_EQL	\
+   ADJUST, KC_LCTL, KC_LGUI, KC_LALT, KC_CAPS, LT_RS,   LT_LE,   LT_RE,   LT_LS,   KC_BSPC, KC_RALT, KC_DEL,  KC_MINS, KC_EQL	\
 ),
 
 // US keymap to JIS keymap
@@ -159,7 +159,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    QWERTY, KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KJ_LBRC, KJ_RBRC,	\
    KC_LCTL,MYLCTL,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KJ_SCLN, KJ_QUOT, KC_ENT,  \
    KC_LSFT,US2JPS,  KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KJ_COMM, KJ_DOT,  KJ_SLSH, US2JPS,  KJ_JYEN, \
-   ADJUST, KC_LCTL, KC_LGUI, KC_LALT, LT_RSJ,  LT_LEJ,  KC_MHEN, KC_HENK, LT_LSJ,  KC_BSPC, KC_ENT,  KC_CAPS, KJ_MINS, KC_BSPC  \
+   ADJUST, KC_LCTL, KC_LGUI, KC_LALT, KC_MHEN, LT_RSJ,  LT_LEJ,  KC_HENK, LT_LSJ,  KC_BSPC, KC_ENT,  KC_CAPS, KJ_MINS, KC_BSPC	\
 ), 
 
 // US keymap with shift key to JIS keymap
@@ -177,7 +177,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    QWERTY,  KC_TAB, C(KC_Q), C(KC_W), KC_END,  C(KC_R), C(KC_T), C(KC_Y), C(KC_U), C(KC_I), C(KC_O), KC_UP,   KC_LBRC, KC_BSPC, \
    _______, _______,KC_HOME, C(KC_S), KC_DEL,  KC_RIGHT,C(KC_G), KC_BSPC, KC_ENT,  C(KC_K), C(KC_L), KC_SCLN, KC_QUOT, KC_ENT,  \
    RAISE,  KC_LSFT, C(KC_Z), C(KC_X), C(KC_C), C(KC_V), KC_LEFT, KC_DOWN, C(KC_M), KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, KC_BSLS, \
-   ADJUST, KC_LCTL, KC_LGUI,KC_LALT,C(KC_SPC),C(KC_ENT),C(KC_CAPS),C(KC_ENT),C(KC_SPC),C(KC_BSPC),KC_RALT,KC_DEL,KC_MINS,KC_EQL \
+   ADJUST, KC_LCTL, KC_LGUI,KC_LALT,C(KC_CAPS),C(KC_SPC),C(KC_ENT),C(KC_ENT),C(KC_SPC),C(KC_BSPC),KC_RALT,KC_DEL,KC_MINS,KC_EQL \
 ),
 
 [_LOWER] = LAYOUT( \
@@ -185,7 +185,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   EMACS, S(KC_NUHS),KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  \
   _______,S(KC_NUBS),_______,KC_LEFT, KC_UP,   KC_RGHT, _______, KC_LEFT, KC_DOWN, KC_UP  , KC_RGHT, _______, KC_LBRC, KC_RBRC, \
   _______, _______, _______, KC_PGUP, KC_DOWN, KC_PGDN, _______, KC_PGUP, KC_PGDN, KC_COMM, KC_DOT,  KC_SCLN, KC_QUOT, KC_ENT,  \
-  _______, _______, _______ ,_______, RAISE,   LOWER,   _______, RAISE,   KC_ENT,  KC_DEL,  _______, KC_SLSH, KC_RSFT, KC_BSLS  \
+  _______, _______, _______ ,_______, _______, _______, _______, _______, _______,  KC_DEL,  _______, KC_SLSH, KC_RSFT, KC_BSLS  \
  ),
 
 [_LOWERJ] = LAYOUT( \
@@ -193,7 +193,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   EMACS,S(KC_NUHS), KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KJ_MINS, KJ_EQL,  \
   _______,S(KC_NUBS),_______,KC_LEFT, KC_UP,   KC_RGHT, _______, KC_LEFT, KC_DOWN, KC_UP  , KC_RGHT, _______, KJ_LBRC, KJ_RBRC, \
   _______, _______, _______, KC_PGUP, KC_DOWN, KC_PGDN, _______, KC_PGUP, KC_PGDN, _______, _______, KJ_SCLN, KJ_QUOT, KC_ENT,  \
-  _______, _______, _______, _______, RAISEJ,  LOWERJ,  _______, RAISEJ,  KC_ENT,  KC_DEL,  _______, KC_MHEN, KC_RSFT, KC_BSLS  \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, KC_DEL,  _______, KC_MHEN, KC_RSFT, KC_BSLS  \
  ),
 
 [_RAISE] = LAYOUT( \
@@ -201,7 +201,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   US2JP,   KC_GRV,  KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_UNDS, KC_PLUS, \
   _______, KC_LCTL, _______, KC_LEFT, KC_UP  , KC_RIGHT,_______, KC_BTN1, KC_BTN3, KC_BTN2, KC_LBRC, KC_RBRC, KC_LCBR, KC_RCBR, \
   _______, KC_LSFT, _______, KC_PGUP, KC_DOWN, KC_PGDN, _______, KC_BTN4, KC_WH_D, KC_BTN5, _______, KC_COLN, KC_DQT,  KC_ENT,  \
-  _______, _______, _______, _______, RAISE,   LOWER,   _______, RAISE,   KC_ENT,  KC_TAB,  _______, KC_MHEN, KC_RSFT, KC_BSLS  \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, KC_TAB,  _______, KC_MHEN, KC_RSFT, KC_BSLS  \
   ),
 
 [_RAISEJ] = LAYOUT( \
@@ -209,7 +209,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   US2JP,   KJ_TILD, KJ_EXLM, KJ_AT,   KJ_HASH, KJ_DLR,  KJ_PERC, KJ_CIRC, KJ_AMPR, KJ_ASTR, KJ_LPRN, KJ_RPRN, KJ_UBAR, KJ_PLUS,	\
   _______, KC_LCTL, _______, KC_LEFT, KC_UP  , KC_RIGHT,_______, KC_BTN1, KC_BTN3, KC_BTN2, KC_LBRC, KC_RBRC, KJ_LCBC, KJ_RCBC, \
   _______, KC_LSFT, _______, KC_PGUP, KC_DOWN, KC_PGDN, _______, KC_BTN4, KC_WH_D, KC_BTN5, _______, KJ_CLN,  KJ_DQT,  KC_ENT,  \
-  _______, _______, _______, _______, RAISEJ,  LOWERJ,  _______, RAISEJ,  KC_ENT,  KC_TAB,  _______, KJ_QUES, KC_RSFT, KC_BSLS  \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, KC_TAB,  _______, KJ_QUES, KC_RSFT, KC_BSLS  \
   ),
 
 [_MOUSE] = LAYOUT( \
