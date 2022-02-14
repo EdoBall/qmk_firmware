@@ -14,9 +14,9 @@ void keyboard_setup(void) {
 
 *2
 protocol_init
- Protocol_pre_init() *21
- Keyboard_init(); *22
- Protocol_post_init() *23
+ protocol_pre_init() *21
+ keyboard_init(); *22
+ protocol_post_init() *23
 
 *3
 protocol_task(void)
@@ -52,23 +52,17 @@ void keyboard_init(void) {
  debug_enable = true;
  keyboard_post_init_kb(); /* Always keep this last */
 
-
-
-
-Matrix_setup()
-	Split_pre_init()
+matrix_setup()
+ split_pre_init()
 	
-	
-Matrix_init
-	Keyboard_pre_init_kb()
-	Matrix_init_pins()
-	Debounce_init()
-	Matrix_init_quantum()
-	Split_post_init
+matrix_init
+ keyboard_pre_init_kb()
+ matrix_init_pins()
+ debounce_init()
+ matrix_init_quantum()
+ split_post_init
 
-
-
-Split_post_init()
-	Transport_slave_init
+split_post_init()
+ transport_slave_init
 	
 
