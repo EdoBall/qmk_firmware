@@ -6,11 +6,11 @@
 #include "config_common.h"
 
 /* USB Device descriptor parameter */
-#define VENDOR_ID    0xFEED
-#define PRODUCT_ID   0x0002
-#define DEVICE_VER   0x0001
-#define MANUFACTURER Edo Ball
-#define PRODUCT      edoball_kb_2
+//#define VENDOR_ID    0xFEED
+//#define PRODUCT_ID   0x0002
+//#define DEVICE_VER   0x0001
+//#define MANUFACTURER EdoBall
+//#define PRODUCT      edoball_kb_2
 
 /* key matrix size */
 #define MATRIX_ROWS 12
@@ -35,6 +35,14 @@
 #define MATRIX_COL_PINS { D2, D4, C6, D7, E6, B4, B5 }
 // #define UNUSED_PINS
 
+// ADNS5050
+#define ADNS5050_SCLK_PIN F4
+  // default: POINTING_DEVICE_SCLK_PIN
+#define ADNS5050_SDIO_PIN F5
+  // default: POINTING_DEVICE_SDIO_PIN
+#define ADNS5050_CS_PIN	  D3
+  // default: POINTING_DEVICE_CS_PIN
+
 /* COL2ROW, ROW2COL */
 #define DIODE_DIRECTION COL2ROW
 
@@ -45,6 +53,7 @@
 
 #define USE_I2C
 #define MASTER_RIGHT
+#define SPLIT_USB_DETECT
 
 //#define LED_NUM_LOCK_PIN B0
 //#define LED_CAPS_LOCK_PIN B1
@@ -138,8 +147,8 @@
 //#define NO_ACTION_ONESHOT
 
 /* disable these deprecated features by default */
-#define NO_ACTION_MACRO
-#define NO_ACTION_FUNCTION
+// #define NO_ACTION_MACRO
+// #define NO_ACTION_FUNCTION
 
 /* Bootmagic Lite key configuration */
 //#define BOOTMAGIC_LITE_ROW 0

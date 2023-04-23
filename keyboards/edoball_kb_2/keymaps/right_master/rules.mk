@@ -22,8 +22,7 @@ SPLIT_KEYBOARD = yes
 
 # for right hand(master): no
 # for left hand(slave):  yes
-#OLED_ENABLE = yes
 OLED_ENABLE = yes
-#POINTING_DEVICE_ENABLE = yes
-POINTING_DEVICE_ENABLE = yes
-
+POINTING_DEVICE_ENABLE = no
+# POINTING_DEVICE_ENABLE = yes
+# POINTING_DEVICE_DRIVER = custom
