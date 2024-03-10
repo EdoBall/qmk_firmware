@@ -12,11 +12,17 @@ from qmk.path import is_keyboard, keyboard
 from qmk.git import git_get_ignored_files
 from qmk.c_parse import c_source_files
 
+CHIBIOS_CONF_CHECKS = ['chconf.h', 'halconf.h', 'mcuconf.h', 'board.h']
+INVALID_KB_FEATURES = set(['encoder_map', 'dip_switch_map', 'combo', 'tap_dance', 'via'])
+
 
 def _list_defaultish_keymaps(kb):
     """Return default like keymaps for a given keyboard
     """
     defaultish = ['ansi', 'iso', 'via']
+
+    # This is only here to flag it as "testable", so it doesn't fly under the radar during PR
+    defaultish.append('vial')
 
     keymaps = set()
     for x in list_keymaps(kb):
@@ -62,6 +68,26 @@ def _handle_json_errors(kb, info):
         ok = False
         cli.log.error(f'{kb}: Warnings found when generating info.json (Strict mode enabled.)')
     return ok
+
+
+def _handle_invalid_features(kb, info):
+    """Check for features that should never be enabled at the keyboard level
+    """
+    ok = True
+    features = set(info.get('features', []))
+    for found in features & INVALID_KB_FEATURES:
+        ok = False
+        cli.log.error(f'{kb}: Invalid keyboard level feature detected - {found}')
+    return ok
+
+
+def _chibios_conf_includenext_check(target):
+    """Check the ChibiOS conf.h for the correct inclusion of the next conf.h
+    """
+    for i, line in enumerate(target.open()):
+        if f'#include_next "{target.name}"' in line:
+            return f'Found `#include_next "{target.name}"` on line {i} of {target}, should be `#include_next <{target.name}>` (use angle brackets, not quotes)'
+    return None
 
 
 def _rules_mk_assignment_only(kb):
@@ -121,6 +147,12 @@ def keymap_check(kb, km):
             cli.log.error(f'{kb}/{km}: The file "{file}" does not have a license header!')
             ok = False
 
+        if file.name in CHIBIOS_CONF_CHECKS:
+            check_error = _chibios_conf_includenext_check(file)
+            if check_error is not None:
+                cli.log.error(f'{kb}/{km}: {check_error}')
+                ok = False
+
     return ok
 
 
@@ -134,6 +166,9 @@ def keyboard_check(kb):
         ok = False
 
     # Additional checks
+    if not _handle_invalid_features(kb, kb_info):
+        ok = False
+
     rules_mk_assignment_errors = _rules_mk_assignment_only(kb)
     if rules_mk_assignment_errors:
         ok = False
@@ -152,6 +187,12 @@ def keyboard_check(kb):
         if not _has_license(file):
             cli.log.error(f'{kb}: The file "{file}" does not have a license header!')
             ok = False
+
+        if file.name in CHIBIOS_CONF_CHECKS:
+            check_error = _chibios_conf_includenext_check(file)
+            if check_error is not None:
+                cli.log.error(f'{kb}: {check_error}')
+                ok = False
 
     return ok
 
