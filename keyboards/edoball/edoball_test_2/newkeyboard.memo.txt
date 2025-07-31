@@ -1,0 +1,75 @@
+新規キーボード作成のためのメモ
+
+◎新規キーボードの作成
+qmk new-keyboard
+する。
+基本的にキーボード名とレイアウトとMCU以外はデフォルトのままでよい。
+(COL2ROWのままとか)
+
+新規キーボードのひながたファイルが作成されるので、
+info.json(keybord.json)を編集。
+
+    "matrix_pins": {
+        "cols": ["GP16", "GP17", "GP18", "GP19", "GP20", "GP21", "GP26", "GP27", "GP28", "GP29", "GP15", "GP14", "GP13", "GP13", "GP13"],
+        "rows": ["GP12", "GP11", "GP10", "GP9", "GP8"]
+
+を使用するピンに応じて編集。
+これにより、MATRIX_ROWSやMATRIX_COLSは、自動的に設定されるよう。
+
+◎デバッグの設定
+info.json で
+        "console": true,
+とするか、
+
+rules.mk に
+CONSOLE_ENABLE = yes
+を追加。
+
+keymap.c に
+
+#include "print.h"
+
+と
+
+void keyboard_post_init_user(void) {
+  // Customise these values to desired behaviour
+  debug_enable=true;
+  debug_matrix=true;
+  debug_keyboard=true;
+  //debug_mouse=true;
+}
+
+と
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  // If console is enabled, it will print the matrix position and status of each key pressed
+#ifdef CONSOLE_ENABLE
+    uprintf("KL: kc: 0x%04X, col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+#endif 
+  return true;
+}
+
+を追加。
+
+◎matrix.c のオーバーライド
+
+rules.mk に以下を追加
+
+SRC += matrix.c
+CUSTOM_MATRIX = lite
+
+matrix.c を記述
+
+以下の関数をオーバーライド
+
+void matrix_init_custom(void) {
+    // TODO: initialize hardware here
+}
+
+bool matrix_scan_custom(matrix_row_t current_matrix[]) {
+    bool matrix_has_changed = false;
+
+    // TODO: add matrix scanning routine here
+
+    return matrix_has_changed;
+}

@@ -1,0 +1,41 @@
+RP2040でPMW3389を使うためのメモ
+
+QMKのドキュメントのpointing deviceの項目では明確に書かれていないが、SPI通信を使う必要がある。
+
+
+SPI設定
+rules.mkファイルに以下の行を追加
+
+SPI_DRIVER = DRIVER_SPI1
+
+config.hファイルでSPIピンを設定
+
+#define SPI_DRIVER SPID1
+#define SPI_SCK_PIN GP26
+#define SPI_MOSI_PIN GP27
+#define SPI_MISO_PIN GP28
+#define PMW33XX_CS_PIN GP29
+
+でとりあえず動く。
+SPID0 と SPID1とで、SCK と MOSIのピンは制限がある。
+picossi USB HOST の場合、GPIOピンの割り当ての関係で、SPID0は使えないよう。
+MISO と (N)CS は任意のピンが使えるよう。
+
+SPID0の場合：
+SCK: GP2, GP6, GP10, GP22のいずれか
+MOSI: GP3, GP7, GP11, GP23のいずれか
+SPID1の場合：
+SCK: GP14, GP26のいずれか
+MOSI: GP15, GP27のいずれか
+
+mcuconf.hの設定
+mcuconf.hファイルに以下の行を追加
+
+#pragma once
+#include_next <mcuconf.h>
+
+#undef RP_SPI_USE_SPI1
+#define RP_SPI_USE_SPI1 TRUE
+
+
+初代Orbitの半透明ボールでも動作した。最近のセンサーは感度が良い。

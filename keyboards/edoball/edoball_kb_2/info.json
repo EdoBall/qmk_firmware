@@ -1,0 +1,9 @@
+{
+    "keyboard_name": "EdoBall_KB-2",
+    "usb": {
+        "pid": "0x0002",
+	"vid": "0xFEED"
+//	"manufacturer": "EdoBall"
+        "device_version": "0.9.0"
+    }
+}

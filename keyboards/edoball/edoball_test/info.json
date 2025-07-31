@@ -1,0 +1,14 @@
+{
+    "manufacturer": "EdoBall",
+    "url": "",
+    "maintainer": "EdoBall",
+    "usb": {
+        "vid": "0xFEED",
+        "pid": "0x6001",
+        "device_version": "0.0.1"
+    },
+
+    "keyboard_name": "EdoBall_test",
+    "processor": "RP2040",
+    "bootloader": "rp2040",
+}

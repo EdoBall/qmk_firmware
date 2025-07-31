@@ -1,0 +1,797 @@
+// Copyright 2023 Edo Ball (@Edo Ball)
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+#include QMK_KEYBOARD_H
+#include "keyboard.h"
+// #include "report.h"
+#include "print.h"
+#include "debug.h"
+#include "sensors/adns5050.h"
+#include "keymap_japanese.h"
+#include "matrix.h"
+
+// I2C_SALVE_2(mouse controler, 8bit address)
+// #define I2C_SLAVE_2_ADDR 0x20
+// #define TIMEOUT 100
+
+// touch keys
+#define TK0OUT GP17
+#define TK0IN GP16
+#define SCRL_MAG 0.05
+
+/*
+#define TK1OUT
+#define TK1IN
+*/
+
+#define _QWERTY 0
+#define _EMACS  1
+#define _US2JP  2
+#define _LOWER  3
+#define _RAISE  4
+#define _US2JPS 5
+#define _MOUSE  6
+#define _MYLCTL 7
+#define _LOWERJ 13
+#define _RAISEJ 14
+#define _ADJUST 15
+
+#define LT_LS LT(_LOWER, KC_SPC)
+#define LT_LE LT(_LOWER, KC_ENT)
+#define LT_RS LT(_RAISE, KC_SPC)
+#define LT_RE LT(_RAISE, KC_ENT)
+#define LT_LSJ LT(_LOWERJ, KC_SPC)
+#define LT_LEJ LT(_LOWERJ, KC_ENT)
+#define LT_RSJ LT(_RAISEJ, KC_SPC)
+#define LT_REJ LT(_RAISEJ, KC_ENT)
+
+// for mousereport
+// static report_mouse_t mouseReport = {};
+
+// touch key's status (LSB: key 0 -> MSB: key 7)
+// (key7 former(MSB), key7 present, key6 former, key6 preset, ..., key0 former, key0 present(LSB))
+static uint8_t touch_key_s = 0;
+
+enum custom_keycodes {
+  QWERTY = SAFE_RANGE,
+  EMACS,
+  US2JP,
+  LOWER,
+  RAISE,
+  US2JPS,
+  MOUSE,
+  LOWERJ,
+  RAISEJ,
+  ADJUST,
+  MYLCTL
+};
+
+// Keycodes for Kigou on US keyborad to JIS keyboard.
+// `
+#define KJ_GRV KC_GRV
+// ~
+#define KJ_TILD S(KC_GRV)
+// !
+#define KJ_EXLM S(KC_1)
+// @
+#define KJ_AT KC_LBRC
+// #
+#define KJ_HASH S(KC_3)
+// $
+#define KJ_DLR S(KC_4)
+// %
+#define KJ_PERC S(KC_5)
+// ^
+#define KJ_CIRC KC_EQL
+// &
+#define KJ_AMPR S(KC_6)
+// *
+#define KJ_ASTR S(KC_QUOT)
+// (
+#define KJ_LPRN S(KC_8)
+// )
+#define KJ_RPRN S(KC_9)
+// -
+#define KJ_MINS KC_MINS
+// _
+//#define KJ_UBAR S(KC_RO)
+#define KJ_UBAR S(KC_INT1)
+// =
+#define KJ_EQL S(KC_MINS)
+// +
+#define KJ_PLUS S(KC_SCLN)
+// [
+#define KJ_LBRC KC_RBRC
+// {
+#define KJ_LCBC S(KC_RBRC)
+// ]
+#define KJ_RBRC KC_BSLS
+// }
+#define KJ_RCBC S(KC_BSLS) 
+// ;
+#define KJ_SCLN KC_SCLN
+// :
+#define KJ_CLN KC_QUOT
+// '
+#define KJ_QUOT S(KC_7)
+// "
+#define KJ_DQT S(KC_2)
+// Yen
+// #define KJ_JYEN KC_JYEN
+#define KJ_JYEN KC_INT3
+// |
+//#define KJ_PIPE S(KC_JYEN)
+#define KJ_PIPE S(KC_INT3)  
+// ,
+#define KJ_COMM KC_COMM
+// <
+#define KJ_LT S(KC_COMM)
+// .
+#define KJ_DOT KC_DOT
+// >
+#define KJ_GT S(KC_DOT)
+// /
+#define KJ_SLSH KC_SLSH
+// ?
+#define KJ_QUES S(KC_SLSH)
+
+
+void write_pin_test(void);
+void adns5050_test(void);
+
+/*
+Key	Aliases	Description
+KC_INTERNATIONAL_1	KC_INT1	JIS \ and _
+KC_INTERNATIONAL_2	KC_INT2	JIS Katakana/Hiragana
+KC_INTERNATIONAL_3	KC_INT3	JIS ¥ and |
+KC_INTERNATIONAL_4	KC_INT4	JIS Henkan
+KC_INTERNATIONAL_5	KC_INT5	JIS Muhenkan
+KC_INTERNATIONAL_6	KC_INT6	JIS Numpad ,
+KC_INTERNATIONAL_7	KC_INT7	International 7
+KC_INTERNATIONAL_8	KC_INT8	International 8
+KC_INTERNATIONAL_9	KC_INT9	International 9
+KC_LANGUAGE_1	KC_LNG1	Hangul/English
+KC_LANGUAGE_2	KC_LNG2	Hanja
+KC_LANGUAGE_3	KC_LNG3	JIS Katakana
+KC_LANGUAGE_4	KC_LNG4	JIS Hiragana
+KC_LANGUAGE_5	KC_LNG5	JIS Zenkaku/Hankaku
+KC_LANGUAGE_6	KC_LNG6	Language 6
+KC_LANGUAGE_7	KC_LNG7	Language 7
+KC_LANGUAGE_8	KC_LNG8	Language 8
+KC_LANGUAGE_9	KC_LNG9	Language 9
+*/
+
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] =
+  {
+   [_QWERTY] = LAYOUT( \
+   QK_GESC,KJ_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_NO, KC_NO, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  \
+   QWERTY, KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_NO, KC_NO, KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, \
+   MYLCTL, KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_NO, KC_NO, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,  \
+   US2JP,  KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_NO, KC_NO, KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, KC_BSLS, \
+   ADJUST, KC_LCTL, KC_LGUI, KC_LALT, KC_CAPS, LT_RS,   LT_LE,   RAISE, KC_NO, LT_RE,   LT_LS,   KC_BSPC, KC_RALT, KC_DEL,  KC_CAPS, KC_BSPC, \
+   RAISE ,  KC_B ,   KC_C,    KC_D ,   KC_E,    KC_F,    KC_G,    KC_H,  KC_I,  KC_J,    KC_K,    KC_L,    KC_M,    KC_N,    KC_O,    KC_P     \
+					  ),
+[_EMACS] = LAYOUT( \
+   QK_GESC,KJ_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_NO, KC_NO, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  \
+   QWERTY, KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_NO, KC_NO, KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, \
+   KC_LCTL,MYLCTL,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_NO, KC_NO, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,  \
+   US2JP,  KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_NO, KC_NO, KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, KC_BSLS, \
+   ADJUST, KC_LCTL, KC_LGUI, KC_LALT, KC_CAPS, LT_RS,   LT_LE,   RAISE, KC_NO, LT_RE,   LT_LS,   KC_BSPC, KC_RALT, KC_DEL,  KC_CAPS, KC_BSPC, \
+   RAISE,  KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO    \
+				   ),
+
+// US keymap to JIS keymap
+[_US2JP] = LAYOUT( \
+   QK_GESC,KJ_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_NO, KC_NO, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KJ_MINS, KJ_EQL,  \
+   QWERTY, KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_NO, KC_NO, KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KJ_LBRC, KJ_RBRC, \
+   KC_LCTL,MYLCTL,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_NO, KC_NO, KC_H,    KC_J,    KC_K,    KC_L,    KJ_SCLN, KJ_QUOT, KC_ENT,  \
+   KC_LSFT,US2JPS,  KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_NO, KC_NO, KC_N,    KC_M,    KJ_COMM, KJ_DOT,  KJ_SLSH, US2JPS,  KJ_JYEN, \
+   ADJUST, KC_LCTL, KC_LGUI, KC_LALT, KC_INT5, LT_RSJ,  LT_LEJ,  KC_INT4,KC_NO,KC_INT4, LT_LSJ,  KC_BSPC, KC_ENT,  KC_DEL,  KC_CAPS, KC_BSPC, \
+   RAISE,  KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO    \
+), 
+
+// US keymap with shift key to JIS keymap
+[_US2JPS] = LAYOUT( \
+   QK_GESC,KJ_TILD, KJ_EXLM, KJ_AT,   KJ_HASH, KJ_DLR,  KJ_PERC, KC_NO, KC_NO, KJ_CIRC, KJ_AMPR, KJ_ASTR, KJ_LPRN, KJ_RPRN, KJ_UBAR, KJ_PLUS, \
+   QWERTY, KC_TAB,  S(KC_Q), S(KC_W), S(KC_E), S(KC_R), S(KC_T), KC_NO, KC_NO, S(KC_Y), S(KC_U), S(KC_I), S(KC_O), S(KC_P), KJ_LCBC, KJ_RCBC, \
+   KC_LCTL,MYLCTL,  S(KC_A), S(KC_S), S(KC_D), S(KC_F), S(KC_G), KC_NO, KC_NO, S(KC_H), S(KC_J), S(KC_K), S(KC_L), KJ_CLN,  KJ_DQT,  KC_ENT,  \
+   KC_LSFT,US2JPS,  S(KC_Z), S(KC_X), S(KC_C), S(KC_V), S(KC_B), KC_NO, KC_NO, S(KC_N), S(KC_M), KJ_LT,   KJ_GT,   KJ_QUES, US2JPS,  KJ_PIPE, \
+   ADJUST, _______, _______, _______, KC_INT4, _______, _______, KC_INT5,KC_NO,KC_INT5, _______, _______, _______, _______, _______, KC_DEL,  \
+   RAISE,  KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO    \
+					),
+
+// MYLCTL (with Emacs like cursor key support)
+[_MYLCTL] = LAYOUT( \
+   QK_GESC, KC_GRV, KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_NO, KC_NO, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  \
+   QWERTY,  KC_TAB, C(KC_Q), C(KC_W), KC_END,  C(KC_R), C(KC_T), KC_NO, KC_NO, C(KC_Y), C(KC_U), C(KC_I), C(KC_O), KC_UP,   KC_LBRC, KC_BSPC, \
+   _______, _______,KC_HOME, C(KC_S), KC_DEL,  KC_RIGHT,C(KC_G), KC_NO, KC_NO, KC_BSPC, KC_ENT,  C(KC_K), C(KC_L), KC_SCLN, KC_QUOT, KC_ENT,  \
+   RAISE,  KC_LSFT, C(KC_Z), C(KC_X), C(KC_C), C(KC_V), KC_LEFT, KC_NO, KC_NO, KC_DOWN, C(KC_M), KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, KC_BSLS, \
+   ADJUST, KC_LCTL, KC_LGUI,KC_LALT,C(KC_CAPS),C(KC_SPC),C(KC_ENT),RAISE,KC_NO,C(KC_ENT),C(KC_SPC),C(KC_BSPC),KC_RALT,KC_DEL,KC_MINS,KC_EQL,  \
+   RAISE,  KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO    \
+					),
+
+[_LOWER] = LAYOUT( \
+  _______, KC_ESC,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_NO, KC_NO, KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11 , KC_F12,  \
+  EMACS, S(KC_NUHS),KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_NO, KC_NO, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  \
+  _______,S(KC_NUBS),_______,KC_LEFT, KC_UP,   KC_RGHT, _______, KC_NO, KC_NO, KC_LEFT, KC_DOWN, KC_UP  , KC_RGHT, _______, KC_LBRC, KC_RBRC, \
+  _______, _______, _______, KC_PGUP, KC_DOWN, KC_PGDN, _______, KC_NO, KC_NO, KC_PGUP, KC_PGDN, KC_COMM, KC_DOT,  KC_SCLN, KC_QUOT, KC_ENT,  \
+  _______, _______, _______ ,_______, _______, _______, _______, LOWER, KC_NO, _______, _______, KC_DEL,  _______, KC_SLSH, KC_RSFT, KC_BSLS, \
+   RAISE , KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO    \
+				   ),
+
+[_LOWERJ] = LAYOUT( \
+  _______, KC_ESC,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_NO, KC_NO, KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11 , KC_F12,  \
+  EMACS,S(KC_NUHS), KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_NO, KC_NO, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KJ_MINS, KJ_EQL,  \
+  _______,S(KC_NUBS),_______,KC_LEFT, KC_UP,   KC_RGHT, _______, KC_NO, KC_NO, KC_LEFT, KC_DOWN, KC_UP  , KC_RGHT, _______, KJ_LBRC, KJ_RBRC, \
+  _______, _______, _______, KC_PGUP, KC_DOWN, KC_PGDN, _______, KC_NO, KC_NO, KC_PGUP, KC_PGDN, _______, _______, KJ_SCLN, KJ_QUOT, KC_ENT,  \
+  _______, _______, _______, _______, _______, _______, _______, LOWER, KC_NO, _______, _______, KC_DEL,  _______, KC_INT5, KC_RSFT, KC_BSLS, \
+   RAISE,  KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO    \
+ ),
+
+[_RAISE] = LAYOUT( \
+  _______, KC_ESC,  KC_MUTE, KC_VOLU, KC_VOLD, KC_F4,   KC_BRID, KC_NO, KC_NO, KC_BRIU, KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  \
+  US2JP,   KC_GRV,  KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_NO, KC_NO, KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_UNDS, KC_PLUS, \
+  _______, KC_LCTL, _______, KC_LEFT, KC_UP  , KC_RIGHT,_______, KC_NO, KC_NO, KC_BTN4, KC_BTN1, KC_BTN3, KC_LBRC, KC_RBRC, KC_LCBR, KC_RCBR, \
+  _______, KC_LSFT, _______, KC_PGUP, KC_DOWN, KC_PGDN, _______, KC_NO, KC_NO, KC_BTN2, KC_BTN4, KC_WH_D, KC_BTN5, KC_COLN, KC_DQT,  KC_ENT, \
+  _______, _______, _______, _______, _______, _______, _______, RAISE, KC_NO, _______, _______, KC_TAB,  _______, KC_INT5, KC_RSFT, KC_BSLS, \
+  _______,  KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO    \
+  ),
+
+[_RAISEJ] = LAYOUT( \
+  _______, KC_ESC,  KC_MUTE, KC_VOLU, KC_VOLD, KC_F4,   KC_BRID, KC_NO, KC_NO, KC_BRIU, KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  \
+  US2JP,   KJ_TILD, KJ_EXLM, KJ_AT,   KJ_HASH, KJ_DLR,  KJ_PERC, KC_NO, KC_NO, KJ_CIRC, KJ_AMPR, KJ_ASTR, KJ_LPRN, KJ_RPRN, KJ_UBAR, KJ_PLUS, \
+  _______, KC_LCTL, _______, KC_LEFT, KC_UP  , KC_RIGHT,_______, KC_NO, KC_NO, KC_BTN4, KC_BTN1, KC_BTN3, KC_LBRC, KC_RBRC, KJ_LCBC, KJ_RCBC, \
+  _______, KC_LSFT, _______, KC_PGUP, KC_DOWN, KC_PGDN, _______, KC_NO, KC_NO, KC_BTN2, KC_BTN4, KC_WH_D, KC_BTN5, KJ_CLN,  KJ_DQT,  KC_ENT, \
+  _______, _______, _______, _______, _______, _______, _______, RAISE, KC_NO, _______, _______, KC_TAB,  _______, KJ_QUES, KC_RSFT, KC_BSLS, \
+  _______,  KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO    \
+  ),
+
+[_MOUSE] = LAYOUT( \
+   QK_GESC,KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_NO, KC_NO, KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  \
+   QWERTY, KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_NO, KC_NO, _______, _______, _______, _______, _______, KC_DEL,  KC_BSPC, \
+   MYLCTL, KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_NO, KC_NO, KC_BTN4, KC_BTN1, KC_BTN3, KC_BTN2, KC_RBRC, KC_BSLS, _______, \
+   _______,KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_NO, KC_NO, KC_BTN2, KC_BTN4, KC_WH_D, KC_BTN5, _______, _______, _______, \
+  _______, _______, _______, _______, _______, _______, _______, KC_NO, KC_NO, _______, KC_BTN2, KC_MNXT, _______, _______, _______, _______, \
+  _______,  KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO    \
+				   ),
+
+[_ADJUST] =  LAYOUT( \
+  QK_RBT,  AG_NORM, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_NO, KC_NO, KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  \
+  QWERTY,  _______, QK_RBT , RGB_TOG, RGB_MOD, RGB_HUD, RGB_HUI, KC_NO, KC_NO, RGB_SAD, RGB_SAI, RGB_VAD, RGB_VAI, _______, _______, KC_PSCR, \
+  EMACS,   _______, _______, _______, AU_ON,   AU_OFF,  AG_NORM, KC_NO, KC_NO, AG_SWAP, QWERTY,  EMACS,   US2JP,   _______, _______, KC_INS,  \
+  US2JP,   _______, _______, _______, _______, _______, _______, KC_NO, KC_NO, _______, _______, _______, _______, _______, _______, KC_SCRL, \
+  ADJUST,  _______, _______, _______, _______, _______, _______, KC_NO, KC_NO, _______, _______, _______, _______, _______, _______, KC_5,    \
+ _______,  KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO, KC_NO, KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO     \
+					 ),
+  };
+
+
+#ifdef AUDIO_ENABLE
+float tone_qwerty[][2]     = SONG(QWERTY_SOUND);
+float tone_dvorak[][2]     = SONG(DVORAK_SOUND);
+float tone_colemak[][2]    = SONG(COLEMAK_SOUND);
+#endif
+
+void persistent_default_layer_set(uint16_t default_layer) {
+  eeconfig_update_default_layer(default_layer);
+  default_layer_set(default_layer);
+}
+
+void keyboard_post_init_user(void) {
+  // Customise these values to desired behaviour
+  debug_enable=false;
+  debug_matrix=false;
+  debug_keyboard=false;
+  debug_mouse=false;
+
+  // for a touch key.
+  setPinOutput(TK0OUT);
+  setPinInput(TK0IN);
+
+  if (!is_keyboard_master()) {
+	setPinOutput(GP25);
+	writePinHigh(GP25);
+	writePinLow(GP25);
+  }
+}
+
+#ifdef POINTING_DEVICE_ENABLE
+#ifdef CONSOLE_ENABLE
+void adns5050_test() {
+  int i;
+  uint8_t ui;
+  uint16_t cpival;
+  uint8_t reg_addr[18] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0d, 0x19, 0x22, 0x3a, 0x3e, 0x3f};
+
+  // adns5050_init();
+  uprintf("read_reg test: ");
+  ui = 0;
+  for (i = 0; i < 18; i++) {
+	ui = adns5050_read_reg(reg_addr[i]);
+	uprintf("%x:%x; ", reg_addr[i], ui);
+  }
+  uprintf("\n");
+  cpival = adns5050_get_cpi();
+  uprintf("r: %d", cpival);
+  cpival = 750;
+  adns5050_set_cpi(cpival);
+  cpival = adns5050_get_cpi();
+  uprintf("; 750?: %d", cpival);
+  adns5050_set_cpi(cpival);
+  cpival = adns5050_get_cpi();
+  uprintf("; r: %d\n", cpival);
+  return;
+}
+#endif
+#endif
+
+// touch_key(a touch sensor on a palm rest.)
+bool touch_key_0(void) {
+  uint16_t i, j, on_c;
+  uint16_t on_delay_c, off_delay_c;
+  
+  writePinLow(TK0OUT);
+  on_c = 0;
+  for (i = 0 ; i < 5; i++) {
+	writePinHigh(TK0OUT);
+	on_delay_c = 34464;
+	for (j = 0; j < 34464; j++) {
+	  if (readPin(TK0IN) == 1) {
+		on_delay_c = j;
+		break;
+	  }
+	  wait_us(1);
+	}
+	// uprintf("(%d,", on_delay_c);
+	writePinLow(TK0OUT);
+	off_delay_c = 34464;
+	for (j = 0; j < 34464; j++) {
+	  if (readPin(TK0IN) == 0) {
+		off_delay_c = j;
+		break;
+	  }
+	  wait_us(1);
+	}
+	// uprintf("%d)", off_delay_c);
+	if (on_delay_c > 6 && off_delay_c > 10) {
+	  // The key may be touched.
+	  on_c++;
+	}
+  }
+  if (on_c == 5) {
+	// The key is touched.
+	touch_key_s = (touch_key_s & 0b11111100) | (((touch_key_s << 1) & 2) + 1);
+	// uprintf("(%d,", on_delay_c);
+	// uprintf("%d)", off_delay_c);
+  } else {
+	if (on_c == 0) {
+	  // The key is released.
+	  touch_key_s = (touch_key_s & 0b11111100) | (((touch_key_s << 1) & 2) + 0);
+	} else {
+	  touch_key_s = touch_key_s | ((touch_key_s & 0b0001) << 1); // (copy former status.)
+	}
+  }
+  // uprintf("%d", touch_key_s);
+  if ((touch_key_s & 3)  >= 1) {
+	//	uprintf("-");
+	// uprintf("%d,", touch_key_s);
+  	return true; // on
+  }
+  return false; // off
+}
+
+// return value: true: not override
+//               false: orverride
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  // static uint16_t c = 0;
+  //  static int interval = 8;
+  //   uint32_t i;
+  //  uint8_t j;
+  // uint16_t pins[8] = {GP6, GP7, GP8, GP9, GP10, GP11, GP12, GP13};
+
+#ifdef CONSOLE_ENABLE
+  //  uprintf("uprint: %u\n", keycode);
+  uprintf("KL: kc: 0x%04X, col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+#endif
+  switch (keycode) {
+      // for mouse control
+      // avoid conflicting mouse reports and mouse keys, hook button keycodes.
+      // memo: mouseReport.buttons = 0x1F (decimal 31, binary 00011111) max (bitmask for mouse buttons 1-5, 1 is rightmost, 5 is leftmost) 0x00 min
+	/*
+  case KC_BTN1:
+      if (record->event.pressed) {
+	mouseReport.buttons |= 1;
+      } else {
+	mouseReport.buttons &= 0x1E; // 0001 1110
+      }
+      // return false;
+	  return true;
+      break;
+    case KC_BTN2:
+      if (record->event.pressed) {
+	mouseReport.buttons |= 2;
+      } else {
+	mouseReport.buttons &= 0x1D; // 0001 1101
+      }
+      return false;
+      break;
+    case KC_BTN3:
+      if (record->event.pressed) {
+	mouseReport.buttons |= 4;
+      } else {
+	mouseReport.buttons &= 0x1B; // 0001 1011
+      }
+      // return false;
+	  return true;
+      break;
+    case KC_BTN4:
+      if (record->event.pressed) {
+	mouseReport.buttons |= 8;
+      } else {
+	mouseReport.buttons &= 0x17; // 0001 0111
+      }
+      // return false;
+	  return true;
+      break;
+    case KC_BTN5:
+      if (record->event.pressed) {
+	mouseReport.buttons |= 16;
+      } else {
+	mouseReport.buttons &= 0x0F; // 0000 1111
+      }
+      // return false;
+	  return true;
+      break;
+	*/
+      // change the default layer.
+  case QWERTY:
+      if (record->event.pressed) {
+#ifdef AUDIO_ENABLE
+          PLAY_SONG(tone_qwerty);
+#endif
+#ifdef SEND_STRING_ENABLE
+		  SEND_STRING("QWERTY mode\n");
+#endif
+        persistent_default_layer_set(1UL<<_QWERTY);
+      }
+      return false;
+      break;
+    case EMACS:
+      if (record->event.pressed) {
+#ifdef SEND_STRING_ENABLE
+		SEND_STRING("EMACS mode\n");
+#endif
+        persistent_default_layer_set(1UL<<_EMACS);
+      }
+      return false;
+      break;
+    case US2JP:
+      if (record->event.pressed) {
+#ifdef SEND_STRING_ENABLE
+		SEND_STRING("US2JP mode\n");
+#endif
+        persistent_default_layer_set(1UL<<_US2JP);
+      }
+      return false;
+      break;
+    case US2JPS:
+      if (record->event.pressed) {
+	layer_on(_US2JPS);
+      } else {
+	layer_off(_US2JPS);
+      }
+      return false;
+      break;
+    case MYLCTL:
+      if (record->event.pressed) {
+	layer_on(_MYLCTL);
+      } else {
+	layer_off(_MYLCTL);
+      }
+      return false;
+      break;
+    case LOWER:
+      if (record->event.pressed) {
+        layer_on(_LOWER);
+        update_tri_layer(_LOWER, _RAISE, _ADJUST);
+      } else {
+        layer_off(_LOWER);
+        update_tri_layer(_LOWER, _RAISE, _ADJUST);
+      }
+      return false;
+      break;
+    case RAISE:
+      if (record->event.pressed) {
+        layer_on(_RAISE);
+        update_tri_layer(_LOWER, _RAISE, _ADJUST);
+      } else {
+        layer_off(_RAISE);
+        update_tri_layer(_LOWER, _RAISE, _ADJUST);
+      }
+      return false;
+      break;
+    case ADJUST:
+      if (record->event.pressed) {
+        layer_on(_ADJUST);
+      } else {
+        layer_off(_ADJUST);
+      }
+      return false;
+      break;
+      // for SJIS
+    case LOWERJ:
+      if (record->event.pressed) {
+        layer_on(_LOWERJ);
+        update_tri_layer(_LOWERJ, _RAISEJ, _ADJUST);
+      } else {
+        layer_off(_LOWERJ);
+        update_tri_layer(_LOWERJ, _RAISEJ, _ADJUST);
+      }
+      return false;
+      break;
+    case RAISEJ:
+      if (record->event.pressed) {
+        layer_on(_RAISEJ);
+        update_tri_layer(_LOWERJ, _RAISEJ, _ADJUST);
+      } else {
+        layer_off(_RAISEJ);
+        update_tri_layer(_LOWERJ, _RAISEJ, _ADJUST);
+      }
+      return false;
+      break;
+  }
+  
+  return true; // not override key code.
+  }
+
+#ifdef POINTING_DEVICE_ENABLE
+void pointing_device_init(void){
+  /*  mouseReport.x = 0;
+  mouseReport.y = 0;
+  mouseReport.v = 0;
+  mouseReport.h = 0;
+  mouseReport.buttons = 0;
+  */
+  // reset adns5050
+  adns5050_write_reg(0x3a, 0x5a);
+  wait_ms(1);
+  adns5050_init();
+  //  adns5050_test();
+  // adns5050_set_cpi(500);
+  adns5050_set_cpi(625);
+
+#ifdef CONSOLE_ENABLE
+  uprintf("sig:%u, cpi:%u\n", adns5050_check_signature(),adns5050_get_cpi());
+  //  uprintf("KL: kc: 0x%04X, col: %2u, row: %2u, pressed: %u, time: %5u, int: %u, count: %u\n", keycode, record->event.key.col, record->event.key.row, record->event.pressed, record->event.time, record->tap.interrupted, record->tap.count);
+#endif   
+}
+
+/*
+void pointing_device_init_user(void){
+  // for a touch sensor
+  setPinOutput(GP14);
+  setPinInput(GP15);
+}
+*/
+
+report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
+  static uint8_t mouse_on = 0;
+  static uint8_t mouse_connected = 1;
+  static uint8_t c = 0;
+  //  static int8_t scrl_mod_x = 0;
+  //  static int8_t scrl_mod_y = 0;
+  static float carry_over_x = 0;
+  static float carry_over_y = 0;
+  float scrl_mag = SCRL_MAG;
+
+  // connection check of a pointing device.
+  if ((mouse_report.x == -1) && (mouse_report.y == -1)) { // may be disconnected
+	  c++;
+	  if (c > 5) { // check 5 times.
+		if (mouse_connected == 1) {
+		  mouse_connected = 0; // disconnected
+		}
+	  }
+	} else {
+	if (mouse_connected == 0) {
+	  mouse_connected = 1; // connected
+	}
+	c = 0;
+  }
+
+  if (mouse_connected == 0) {
+	mouse_report.x = mouse_report.y = 0;
+	return mouse_report;
+  }
+  
+  // for a touch key
+  touch_key_0();
+  //  uprintf("%x", touch_key_s);
+  if ((touch_key_s & 3) == 1) { // on
+	layer_on(_MOUSE);
+	mouse_on = 1;
+	//	uprintf("ON");
+  }
+
+  if ((touch_key_s & 3) == 2) { // off
+  //  if ((touch_key_s & 3) == 0) { // off twice.
+	layer_off(_MOUSE);
+	mouse_on = 0;
+	carry_over_x = carry_over_y = 0;
+	//	uprintf("OFF");
+  }
+
+  if (mouse_on == 1) {
+	mouse_report.x = mouse_report.x;
+	mouse_report.y = mouse_report.y;
+  } else {
+	// mouse off: scrolling
+	carry_over_x = carry_over_x + mouse_report.x * scrl_mag;
+	if (carry_over_x > 127.0) {
+	  carry_over_x = 127.0;
+	}
+	if (carry_over_x < -127.0) {
+	  carry_over_x = -127.0;
+	}
+	mouse_report.h = (int8_t)carry_over_x;
+	carry_over_x = carry_over_x - mouse_report.h;
+
+	carry_over_y = carry_over_y + mouse_report.y * scrl_mag;
+	if (carry_over_y > 127.0) {
+	  carry_over_y = 127.0;
+	}
+	if (carry_over_y < -127.0) {
+	  carry_over_y = -127.0;
+	}
+	mouse_report.v = (int8_t)carry_over_y;
+	carry_over_y = carry_over_y - mouse_report.v;
+	mouse_report.v = -mouse_report.v;
+#ifdef CONSOLE_ENABLE
+	if (mouse_report.y != 0) {
+	  uprintf("%d,%d,%d:", mouse_report.y, mouse_report.v, (uint16_t)(carry_over_y*1000));
+	}
+#endif
+	mouse_report.x = 0;
+	mouse_report.y = 0;
+  }
+  return mouse_report;
+}
+#endif
+
+// for slave touch key
+/* matrix state(1:on, 0:off) */
+extern matrix_row_t raw_matrix[MATRIX_ROWS]; // raw values
+extern matrix_row_t matrix[MATRIX_ROWS];     // debounced values
+
+void matrix_slave_scan_user(void) {
+  //  uint16_t i;
+  static uint16_t key_timer_tmp, key_timer = 0;
+  static uint8_t on_f = 0;
+
+  key_timer_tmp = timer_read();
+  if ((key_timer_tmp - key_timer) > 50) {
+	touch_key_0();
+	if ((touch_key_s & 1) == 1) { // on
+	  on_f = 1;
+	  writePinHigh(GP25);
+	}
+	if ((touch_key_s & 1) == 0) { // off
+	  on_f = 0;
+	  writePinLow(GP25);
+	}
+	key_timer = timer_read();
+  }
+
+  matrix[MATRIX_ROWS / 2 - 1] = matrix[MATRIX_ROWS / 2 - 1] | on_f;
+
+
+  /* 
+  for (i = 0; i < MATRIX_ROWS / 2; i ++) {
+	if (matrix[i] > 0) {
+	  matrix[0] = matrix[0] | (4 << i);
+	}
+  }
+  */
+  return;
+}
+
+#ifdef OLED_ENABLE
+//#ifndef OLED_DRIVER_ENABLE // OLD QMK version.
+/*
+bool oled_task_user(void) {
+
+  // Host Keyboard Layer Status
+  // The highest layer:
+  oled_write_P(PSTR("Layer: "), false);
+
+  switch (get_highest_layer(layer_state)) {
+        case _QWERTY:
+            oled_write_P(PSTR("Default\n"), false);
+            break;
+        case _EMACS:
+            oled_write_P(PSTR("EMACS\n"), false);
+            break;
+        case _US2JP:
+            oled_write_P(PSTR("US2JP\n"), false);
+            break;
+        case _LOWER:
+            oled_write_P(PSTR("LOWER\n"), false);
+            break;
+        case _RAISE:
+            oled_write_P(PSTR("RAISE\n"), false);
+            break;
+        case _US2JPS:
+            oled_write_P(PSTR("US2JPS\n"), false);
+            break;
+        case _MOUSE:
+            oled_write_P(PSTR("MOUSEP\n"), false);
+            break;
+        case _MYLCTL:
+            oled_write_P(PSTR("MYCTL\n"), false);
+            break;
+        case _LOWERJ:
+            oled_write_P(PSTR("LOWERJ\n"), false);
+            break;
+        case _RAISEJ:
+            oled_write_P(PSTR("RAISEJ\n"), false);
+            break;
+        case _ADJUST:
+            oled_write_P(PSTR("ADJUST\n"), false);
+            break;
+        default:
+            // Or use the write_ln shortcut over adding '\n' to the end of your string
+            oled_write_ln_P(PSTR("Undefined"), false);
+    }
+
+    // The default layer:
+  oled_write_P(PSTR("Default: "), false);
+  switch (default_layer_state) {
+  case 1 << _QWERTY:
+    oled_write_P(PSTR("QWERTY\n"), false);
+    break;
+  case 1 << _EMACS:
+    oled_write_P(PSTR("EMACS\n"), false);
+    break;
+  case 1 << _US2JP:
+    oled_write_P(PSTR("US2JP\n"), false);
+    break;
+  case 1 << _LOWER:
+    oled_write_P(PSTR("LOWER\n"), false);
+    break;
+  case 1 << _RAISE:
+    oled_write_P(PSTR("RAISE\n"), false);
+    break;
+  case 1 << _US2JPS:
+    oled_write_P(PSTR("US2JPS\n"), false);
+    break;
+  case 1 << _MOUSE:
+    oled_write_P(PSTR("MOUSEP\n"), false);
+    break;
+  case 1 << _MYLCTL:
+    oled_write_P(PSTR("MYCTL\n"), false);
+    break;
+  case 1 << _LOWERJ:
+    oled_write_P(PSTR("LOWERJ\n"), false);
+    break;
+  case 1 << _RAISEJ:
+    oled_write_P(PSTR("RAISEJ\n"), false);
+    break;
+  case 1 << _ADJUST:
+    oled_write_P(PSTR("ADJUST\n"), false);
+    break;
+  default:
+    // Or use the write_ln shortcut over adding '\n' to the end of your string
+    oled_write_ln_P(PSTR("Undefined"), false);
+  }
+
+  // Host Keyboard LED Status
+  led_t led_state = host_keyboard_led_state();
+  oled_write_P(led_state.num_lock ? PSTR("NUM ") : PSTR("    "), false);
+  oled_write_P(led_state.caps_lock ? PSTR("CAP ") : PSTR("    "), false);
+  oled_write_P(led_state.scroll_lock ? PSTR("SCR ") : PSTR("    "), false);
+  return false;
+}
+
+*/
+#endif

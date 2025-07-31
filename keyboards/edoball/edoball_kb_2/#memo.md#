@@ -1,0 +1,83 @@
+#新規キーボードの設定方法
+
+https://okayu-moka.hatenablog.com/entry/2019/09/08/170000
+は参考になるが、少々情報が古い。
+(例えば、今は 'util/new_keyboard.sh' は使わない。)
+
+##新規キーボード作成
+'qmk new-keyboard' で新規キーボードを作成。
+下記のようにプロンプトに答える。
+default keymapは作成されるので、defaultのみで良ければ、 'qmk new-keymap' は不要。
+
+'''
+tearus@DESKTOP-R5B9S3S:~/github/qmk_firmware$ qmk new-keyboard
+Ψ Generating a new QMK keyboard directory
+
+Keyboard Name: edoball_kb_2
+Keyboard Type:
+        1. avr
+        2. ps2avrgb
+Please enter your choice:  [1] 1
+Your GitHub User Name: [Edo Ball]
+Your real name: [Edo Ball]
+
+Ψ Created a new keyboard called edoball_kb_2.
+Ψ To start working on things, `cd` into keyboards/edoball_kb_2,
+Ψ or open the directory in your preferred text editor.
+tearus@DESKTOP-R5B9S3S:~/github/qmk_firmware$ pwd
+/home/tearus/github/qmk_firmware
+tearus@DESKTOP-R5B9S3S:~/github/qmk_firmware$ qmk new-keymap -kb edoball_kb_2 -km default
+☒ Keymap /home/tearus/github/qmk_firmware/keyboards/edoball_kb_2/keymaps/default already exists!
+tearus@DESKTOP-R5B9S3S:~/github/qmk_firmware$
+'''
+
+## config.h の修正
+
+分割キーボードの場合、MATRIX_ROWS は2倍にする。(keymaps.c のマクロでごちゃごちゃやってるから。)
+
+## MATRIX_ROW_PINS と MATRIX_COL_PINS の書き方
+https://i.imgur.com/JcDhZll.png
+https://cdn.sparkfun.com/datasheets/Dev/Arduino/Boards/ProMicro16MHzv1.pdf
+https://cdn.discordapp.com/attachments/418326189644709889/770711566496694282/image0.png
+のPortから'P'を除いたもので表記する。
+基板上の表記との対応は以下のとおり。
+
+RAW GND RST VCC A3 A2 A1 A0 15 14 16 10
+                F4 F5 F6 F7 B1 B3 B2 B6
+
+TXO RXI GND GND 2  3  4  5  6  7  8  9
+D3  D2          D1 D0 D4 C6 D7 E6 B4 B5
+
+8## config.h 中の MATRIX_ROW_PINS, MATRIX_COL_PINS の設定とkeymapとの関係
+
+8/16現在以下の設定だが、
+
+
+#define MATRIX_ROW_PINS { F6, F7, B1, B3, B2, B6 }
+#define MATRIX_COL_PINS { D2, D4, C6, D7, E6, B4, B5 }
+
+Col は、
+左手キーボードでは、左から右に
+右手キーボードでは、右から左に
+つまり、中心から遠いほうから中心に向けての配列
+Rowは
+右手、左手キーボード共に、奥から手前への順。
+
+
+
+
+## info.json
+info.jsonの設定は必要ではないようだ。
+
+## edoball_kb_2.h
+改行前のEscape文字'\'の後にスペースが隠れてるかもしれないので注意!
+keymap.c も同様。(はまった。)
+
+## インストール
+// I2C接続の場合、I2Cの初期化(？)が終わらないとデバイス識別子が返されない。
+2022/12のバージョンではSlaveが認識されなくても動いているよう。
+Slave: 0x32 (default)
+OLED: 0x3C (default)
+Trackball Controler: 0x38
+I2C接続を確実にするか、テスト用のFirmwareを準備した方が良さそう。
+

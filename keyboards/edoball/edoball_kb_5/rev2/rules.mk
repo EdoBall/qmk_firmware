@@ -1,0 +1,11 @@
+# This file intentionally left blank
+SRC += matrix.c
+CUSTOM_MATRIX = lite
+POINTING_DEVICE_ENABLE = yes
+POINTING_DEVICE_DRIVER = custom
+RGBLIGHT_ENABLE = yes
+WS2812_DRIVER_REQUIRED = yes
+WS2812_DRIVER = vendor
+
+KEY_OVERRIDE_ENABLE = yes
+# CONSOLE_ENABLE = yes
