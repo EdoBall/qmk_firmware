@@ -9,7 +9,7 @@
  */
 
 /* disable debug print */
-//#define NO_DEBUG
+// #define NO_DEBUG
 
 /* disable print */
 //#define NO_PRINT
@@ -19,15 +19,15 @@
 //#define NO_ACTION_TAPPING
 //#define NO_ACTION_ONESHOT
 
-// LEDシリアル信号を送るピンを指定
-#define RGB_DI_PIN GP15
-// LEDの数を指定
-#define RGBLED_NUM 4
-// #define WS2812_RGBW
+// LED pin
+// Internal: GP16, PCB: GP15
 // #define WS2812_DI_PIN GP16
-//#define WS2812_LED_COUNT 4
 
-// 最大輝度（USB電流制限に注意）
+// Numbers of LED
+// Internal: 1
+// #define RGBLED_NUM 1
+
 #define RGBLIGHT_LIMIT_VAL 120
-#define RGBLIGHT_ANIMATIONS
-// 他にもエフェクトを追加可能
+#define RGBLIGHT_EFFECT_BREATHING
+#define RGBLIGHT_EFFECT_RAINBOW_MOOD
+

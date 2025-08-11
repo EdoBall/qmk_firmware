@@ -312,7 +312,7 @@ void matrix_init_custom(void) {
 
     debounce_init(MATRIX_ROWS);
 
-    matrix_init_quantum();
+    //    matrix_init_quantum();
 }
 
 bool matrix_scan_custom(matrix_row_t* current_matrix) {

@@ -1,6 +1,6 @@
 {
     "manufacturer": "Edo Ball",
-    "keyboard_name": "edoball_kb_5.2",
+    "keyboard_name": "edoball_kb_5.1",
     "maintainer": "Edo Ball",
     "bootloader": "rp2040",
     "diode_direction": "COL2ROW",
@@ -29,7 +29,7 @@
     },
     "ws2812": {
         "driver": "vendor",
-        "pin": "GP16"
+        "pin": "GP15"
     },
     "layouts": {
         "LAYOUT_ortho_16x5": {

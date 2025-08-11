@@ -84,9 +84,9 @@ static uint8_t my_modifier = 0;
 // Key Override
 // Mode: NoOverride, US(Key)2JIS(OS), JIS2US,
 // Cursor Mode: No, Ctrl + Emacs (the touch key cancellation), Ctrl + the touch key + Emacs, vi(with the touch key),
-const key_override_t **key_overrides;
-static const key_override_t *working_overrides[MAX_KEY_OVERRIDES];
-static const key_override_t *saved_overrides[MAX_KEY_OVERRIDES];
+const key_override_t *key_overrides[MAX_KEY_OVERRIDES];
+// static const key_override_t *working_overrides[MAX_KEY_OVERRIDES];
+// static const key_override_t *saved_overrides[MAX_KEY_OVERRIDES];
 static int8_t n_overrides;
 static int8_t pos_dummy_override; // for on/off cursor overrides
 
@@ -247,50 +247,48 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    KC_LCTL, _______, KC_LGUI, KC_LALT, KC_SPC, KC_ENT,   KC_INT4, KC_SPC,  KC_BSPC, KC_RALT, KC_DEL,  KC_CAPS, KC_BSPC, KC_NO, KC_NO, KC_NO \
                                                                         ), \
     [_ADJUST] = LAYOUT_ortho_16x5(                                       \
-   TG(_CURSOR), CC_USUS, CC_USJP, CC_CTL_INV,CC_TBUP,CC_TBDWN,TG(_TENKEY),KC_7,KC_8,KC_9,    KC_0,    KC_MINS, KC_EQL,  CC_PR1,CC_PCB1,CC_TW1, \
+   TG(_CURSOR), CC_USUS, CC_USJP, CC_CTL_INV,CC_TBUP,CC_TBDWN,TG(_TENKEY),KC_7,KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  CC_PR1,CC_PCB1,CC_TW1, \
    CC_INFO, _______, _______, _______, CC_TENKEY, KC_T,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_NO, KC_NO, KC_NO, \
    KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,  KC_NO, KC_NO, KC_NO, \
-   KC_LSFT, RGB_M_P, RGB_M_B, RGB_M_R, RGB_M_SW,RGB_M_SN,RGB_M_K, RGB_M_X, RGB_M_G, RGB_M_T, RGB_M_TW,KC_RSFT, KC_BSLS, KC_NO, KC_NO, KC_NO, \
+   KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, KC_BSLS, KC_NO, KC_NO, KC_NO, \
    KC_LCTL, _______, KC_LGUI, KC_LALT, KC_SPC, KC_ENT,   KC_INT4, KC_SPC,  KC_BSPC, KC_RALT, KC_DEL,  KC_CAPS, CC_ADJUST,KC_NO, KC_NO, KC_NO \
                                                                         ), \
 };
 
-/*
-RGB_MODE_PLAIN	RGB_M_P	Static (no animation) mode (deprecated)
-RGB_MODE_BREATHE	RGB_M_B	Breathing animation mode (deprecated)
-RGB_MODE_RAINBOW	RGB_M_R	Rainbow animation mode (deprecated)
-RGB_MODE_SWIRL	RGB_M_SW	Swirl animation mode (deprecated)
-RGB_MODE_SNAKE	RGB_M_SN	Snake animation mode (deprecated)
-RGB_MODE_KNIGHT	RGB_M_K	"Knight Rider" animation mode (deprecated)
-RGB_MODE_XMAS	RGB_M_X	Christmas animation mode (deprecated)
-RGB_MODE_GRADIENT	RGB_M_G	Static gradient animation mode (deprecated)
-RGB_MODE_RGBTEST	RGB_M_T	Red, Green, Blue test animation mode (deprecated)
-RGB_MODE_TWINKLE	RGB_M_TW	Twinkle animation mode (deprecated)
-*/
-
 // Key override functions
-void clear_overrides(void) {
-    working_overrides[0] = NULL;
+void init_overrides(void) {
+    key_overrides[0] = NULL;
     n_overrides = 0;
 }
 
-void init_overrides(void) {
+/*
+void effect_overrides(void) {
+    int8_t i;
     clear_overrides();
-    key_overrides = working_overrides;
+    for (i = 0; i < MAX_KEY_OVERRIDES - 1; i++) {
+        key_overrides[i] = working_overrides[i];
+        if (working_overrides[i] == NULL) {
+            break;
+        }
+    }
+    key_overrides[i] = NULL;
+    //key_overrides = (const key_override_t **)working_overrides;
 }
+*/
 
 int8_t add_overrides(const key_override_t **add) {
     int8_t j;
     for (j = 0; n_overrides < MAX_KEY_OVERRIDES - 1; n_overrides++, j++) {
-        working_overrides[n_overrides] = add[j];
-        if (working_overrides[n_overrides] == NULL) {
+        key_overrides[n_overrides] = add[j];
+        if (key_overrides[n_overrides] == NULL) {
             return(n_overrides);
         }
     }
-    working_overrides[++n_overrides] = NULL;
+    key_overrides[n_overrides] = NULL;
     return(n_overrides);
 }
 
+/*
 int8_t save_overrides(void) {
     int8_t i;
     for (i = 0; i <= n_overrides; i++) {
@@ -316,6 +314,7 @@ int8_t load_overrides(void) {
     working_overrides[n_overrides] = NULL;
     return(n_overrides);
 }
+*/
 
 int8_t set_overrides(const key_override_t **ko1, const key_override_t **ko2, const key_override_t **ko3) {
     // ko1: basic (for layout) overrides, ko2: basic 2, ko3: cursor overrides
@@ -328,12 +327,12 @@ int8_t set_overrides(const key_override_t **ko1, const key_override_t **ko2, con
 }
 
 int8_t cursor_overrides_on(void) {
-    working_overrides[pos_dummy_override] =&dummy_override;
+    key_overrides[pos_dummy_override] =&dummy_override;
     return(true);
 }
 
 int8_t cursor_overrides_off(void) {
-    working_overrides[pos_dummy_override] = NULL;
+    key_overrides[pos_dummy_override] = NULL;
     return(true);
 }
 
@@ -345,16 +344,16 @@ bool process_pseudo_control(uint16_t keycode, keyrecord_t *record) {
     flag = (((my_modifier & 1 << MM_TW) >= 1) ^ ((kb_mode & 1 << M_PCTL_INV) >= 1));
     if (record->event.pressed) { // pseudo control is pressed.
         // have checked that the pseudo control is pressed.
-        if (flag == 1) { // The touch wall is on (and the invert mode off): register ctrl key, not activate cursor orverrides.
+        if (flag == 1) { // The touch wall is on, register ctrl key, not activate cursor orverrides.
         // if ((my_modifier & 1 << MM_TW) > 0xFF) { // Always off
             register_code(KC_LCTL);
-            // my_modifier = my_modifier & ~(1 << MM_PC);
+            my_modifier = my_modifier & ~(1 << MM_PC);
             sprintf(debug_str, "normal");
             dprint(debug_str);
+            //
         } else { // register cursor key overrides
             sprintf(debug_str, "emacs");
             dprint(debug_str);
-            // my_modifier = my_modifier & ~(1 << MM_PC);
             cursor_overrides_on();
             register_code(KC_LCTL);
         }
@@ -433,7 +432,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             kb_mode |= 1 << M_USUS;
             kb_mode &= ~(1 << M_USJP);
             rgblight_sethsv(HSV_GREEN);
-            rgblight_mode((uint8_t)(RGBLIGHT_MODE_BREATHING));
+            rgblight_mode((uint8_t)(RGB_MODE_BREATHE));
             dprint("USUS");
             return false; // Do not let QMK process the keycode further
         }
@@ -446,7 +445,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             kb_mode |= 1 << M_USJP;
             kb_mode &= ~(1 << M_USUS);
             rgblight_sethsv(HSV_CYAN);
-            rgblight_mode((uint8_t)(RGBLIGHT_MODE_BREATHING) + 2);
+            rgblight_mode((uint8_t)(RGB_MODE_BREATHE) + 1);
             dprint("USJP");
             return false; // Do not let QMK process the keycode further
         }
@@ -457,7 +456,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             kb_mode ^= 1 << M_PCTL_INV;
             sprintf(debug_str, "CTL_INV:%x", kb_mode);
             if ((kb_mode & (1 << M_PCTL_INV)) >= 1) {
-                    rgblight_mode((uint8_t)(RGBLIGHT_MODE_BREATHING + 3));
+                    rgblight_mode((uint8_t)(RGBLIGHT_MODE_RAINBOW_MOOD));
                 } else {
                     rgblight_mode((uint8_t)(RGBLIGHT_MODE_BREATHING));
                 }
