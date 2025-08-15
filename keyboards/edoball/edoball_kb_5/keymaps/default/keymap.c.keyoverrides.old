@@ -84,9 +84,9 @@ static uint8_t my_modifier = 0;
 // Key Override
 // Mode: NoOverride, US(Key)2JIS(OS), JIS2US,
 // Cursor Mode: No, Ctrl + Emacs (the touch key cancellation), Ctrl + the touch key + Emacs, vi(with the touch key),
-const key_override_t *key_overrides[MAX_KEY_OVERRIDES];
-// static const key_override_t *working_overrides[MAX_KEY_OVERRIDES];
-// static const key_override_t *saved_overrides[MAX_KEY_OVERRIDES];
+const key_override_t **key_overrides;
+static const key_override_t *working_overrides[MAX_KEY_OVERRIDES];
+static const key_override_t *saved_overrides[MAX_KEY_OVERRIDES];
 static int8_t n_overrides;
 static int8_t pos_dummy_override; // for on/off cursor overrides
 
@@ -121,11 +121,11 @@ const key_override_t *emacs_overrides[] =
      &ko_make_with_layers(MOD_MASK_CTRL, KC_B, KC_LEFT, 1 << _QWERTY),
      &ko_make_with_layers(MOD_MASK_CTRL, KC_P, KC_UP, 1 << _QWERTY),
      &ko_make_with_layers(MOD_MASK_CTRL, KC_N, KC_DOWN, 1 << _QWERTY),
-     //     &ko_make_with_layers(MOD_MASK_CTRL, KC_V, KC_PGDN, 1 << _QWERTY),
+     &ko_make_with_layers(MOD_MASK_CTRL, KC_V, KC_PGDN, 1 << _QWERTY),
      &ko_make_with_layers(MOD_MASK_CTRL, KC_A, KC_HOME, 1 << _QWERTY),
      &ko_make_with_layers(MOD_MASK_CTRL, KC_E, KC_END, 1 << _QWERTY),
      &ko_make_with_layers(MOD_MASK_CTRL, KC_D, KC_DEL, 1 << _QWERTY),
-     //     &ko_make_with_layers(MOD_MASK_ALT,  KC_V, KC_PGUP, 1 << _QWERTY),
+     &ko_make_with_layers(MOD_MASK_ALT,  KC_V, KC_PGUP, 1 << _QWERTY),
      NULL
     };
 
@@ -222,7 +222,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    QK_GESC, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, CC_PR1,CC_PCB1,CC_TW1, \
    KC_TAB,  _______, KC_UP,   _______, _______, _______, _______, _______, TG(_CURSOR),_______,_______,_______,_______, KC_NO, KC_NO, KC_NO, \
    KC_LCTL, KC_LEFT,KC_DOWN,KC_RIGHT,  _______, _______, KC_LEFT, KC_DOWN, KC_UP,   KC_RIGHT,_______, _______, KC_ENT,  KC_NO, KC_NO, KC_NO, \
-   KC_LSFT, _______, _______, _______, _______, _______, _______, _______, _______, _______, S(KC_LEFT),KC_UP,S(KC_RIGHT), KC_NO,KC_NO,KC_NO, \
+   KC_LSFT, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, KC_UP,   _______, KC_NO,KC_NO,KC_NO, \
    KC_LCTL, _______, KC_LGUI, KC_LALT, KC_SPC, KC_ENT,   KC_INT4, KC_SPC,  KC_BSPC, KC_RALT, KC_LEFT, KC_DOWN, KC_RIGHT,KC_NO, KC_NO, KC_NO  \
                                                                         ), \
     [_TENKEY] = LAYOUT_ortho_16x5(                                       \
@@ -256,39 +256,28 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 // Key override functions
-void init_overrides(void) {
-    key_overrides[0] = NULL;
+void clear_overrides(void) {
+    working_overrides[0] = NULL;
     n_overrides = 0;
 }
 
-/*
-void effect_overrides(void) {
-    int8_t i;
+void init_overrides(void) {
     clear_overrides();
-    for (i = 0; i < MAX_KEY_OVERRIDES - 1; i++) {
-        key_overrides[i] = working_overrides[i];
-        if (working_overrides[i] == NULL) {
-            break;
-        }
-    }
-    key_overrides[i] = NULL;
-    //key_overrides = (const key_override_t **)working_overrides;
+    key_overrides = working_overrides;
 }
-*/
 
 int8_t add_overrides(const key_override_t **add) {
     int8_t j;
     for (j = 0; n_overrides < MAX_KEY_OVERRIDES - 1; n_overrides++, j++) {
-        key_overrides[n_overrides] = add[j];
-        if (key_overrides[n_overrides] == NULL) {
+        working_overrides[n_overrides] = add[j];
+        if (working_overrides[n_overrides] == NULL) {
             return(n_overrides);
         }
     }
-    key_overrides[n_overrides] = NULL; // n_overrides == MAX_KEY_OVERRIDES - 1
+    working_overrides[++n_overrides] = NULL;
     return(n_overrides);
 }
 
-/*
 int8_t save_overrides(void) {
     int8_t i;
     for (i = 0; i <= n_overrides; i++) {
@@ -314,7 +303,6 @@ int8_t load_overrides(void) {
     working_overrides[n_overrides] = NULL;
     return(n_overrides);
 }
-*/
 
 int8_t set_overrides(const key_override_t **ko1, const key_override_t **ko2, const key_override_t **ko3) {
     // ko1: basic (for layout) overrides, ko2: basic 2, ko3: cursor overrides
@@ -327,115 +315,26 @@ int8_t set_overrides(const key_override_t **ko1, const key_override_t **ko2, con
 }
 
 int8_t cursor_overrides_on(void) {
-    key_overrides[pos_dummy_override] =&dummy_override;
+    working_overrides[pos_dummy_override] =&dummy_override;
     return(true);
 }
 
 int8_t cursor_overrides_off(void) {
-    key_overrides[pos_dummy_override] = NULL;
+    working_overrides[pos_dummy_override] = NULL;
     return(true);
 }
-/*
-bool pre_process_record_user(uint16_t keycode, keyrecord_t *record) {
-    //    int8_t flag;
-
-    // Pseudo Control: active (cursor override: on) (My Modifier: Touch Wall: on, Keyboard mode: Psuedo Control: Invert mode.)
-    if (keycode != CC_PCTL) { // not pseudo control - another key pressed. check touch wall status.
-        //        flag = (((my_modifier & 1 << MM_TW) >= 1) ^ ((kb_mode & 1 << M_PCTL_INV) >= 1));
-        if (record->event.pressed) { // any key is pressed.
-            if ((my_modifier & MM_PC) >= 1) { // pseudo control: on
-                register_code(KC_LCTL);
-                // cursor_overrides_on();
-                my_modifier = my_modifier & ~(1 << MM_PC); // Pseudo Contrl is off.
-                // My Modifier: Psuedo Controll off
-                sprintf(debug_str, "CTL,");
-                dprint(debug_str);
-            }
-        }
-    }
-    return true; // not handled
-}
-*/
-
-/* bool tiny_cursor_overrides(uint16_t keycode, keyrecord_t *record) {
-    int16_t i;
-    sprintf(debug_str, "%d", (int)keycode);
-    dprint(debug_str);
-    return(false);
-    for (i = 0; (key_overrides[i] != NULL) && i < 10; i++) {
-        if (key_overrides[i]->trigger == keycode) {
-            register_code(key_overrides[i]->replacement);
-            // register_code(keycode + 1);
-            return(false); // handled.
-        }
-    }
-    register_code(KC_LCTL);
-    return(true); // not handled.
-}
-    
-
-bool process_pseudo_control(uint16_t keycode, keyrecord_t *record) {
-    int8_t flag;
-
-    // Pseudo Control: active (cursor override: on) (My Modifier: Touch Wall: on, Keyboard mode: Psuedo Control: Invert mode.)
-    flag = (((my_modifier & 1 << MM_TW) >= 1) ^ ((kb_mode & 1 << M_PCTL_INV) >= 1));
-    if (keycode != CC_PCTL) { // not pseudo control - another key pressed. check touch wall status.
-        if (record->event.pressed) { // any key is pressed.
-            if ((my_modifier & (1 << MM_PC)) >= 1) { // pseudo control: on
-                if (tiny_cursor_overrides(keycode, record) == false) {
-                    sprintf(debug_str, "CTL,");
-                    dprint(debug_str);
-                    return false;
-
-                }
-                register_code(KC_LCTL);
-            }
-        }
-        return true; // not handled
-    }
-    // PCTRL is pressed or released.
-    if (record->event.pressed) { // pseudo control is pressed.
-        // have checked that the pseudo control is pressed.
-        if (flag == 1) { // The touch wall is on, register ctrl key, not activate cursor orverrides.
-            register_code(KC_LCTL);
-            my_modifier = my_modifier & ~(1 << MM_PC); // Pseudo Contrl is off.
-            sprintf(debug_str, "normal");
-            dprint(debug_str);
-            //
-        } else { // register cursor key overrides
-            my_modifier |= 1 << MM_PC; // Pseudo Control flag is on.
-            //cursor_overrides_on(); // cursor overrides is on.
-            cursor_overrides_off(); // cursor overrides is off.
-            // register_code(KC_LCTL);
-            sprintf(debug_str, "emacs");
-            dprint(debug_str);
-        }
-        return false; // handled.
-    } else { // CC_PCTL is not pressed.
-        //clear_overrides();
-        cursor_overrides_off();
-        unregister_code(KC_LCTL);
-        my_modifier = my_modifier & ~(1 << MM_PC); // Pseudo Contrl is off.
-        return false; // handled.
-    }
-    return(true); // does not run.(?)
-}
-*/
 
 bool process_pseudo_control(uint16_t keycode, keyrecord_t *record) {
     if (keycode != CC_PCTL) { // not pseudo control - do nothing.
         return(true); 
     }
     int8_t flag;
-
-    // My Modifier: Touch Wall on, Keyboard mode: Psuedo Control: Invert mode.
     flag = (((my_modifier & 1 << MM_TW) >= 1) ^ ((kb_mode & 1 << M_PCTL_INV) >= 1));
     if (record->event.pressed) { // pseudo control is pressed.
         // have checked that the pseudo control is pressed.
         if (flag == 1) { // The touch wall is on, register ctrl key, not activate cursor orverrides.
         // if ((my_modifier & 1 << MM_TW) > 0xFF) { // Always off
             register_code(KC_LCTL);
-            // My Modifier: Psuedo Controll off
             my_modifier = my_modifier & ~(1 << MM_PC);
             sprintf(debug_str, "normal");
             dprint(debug_str);
@@ -457,7 +356,6 @@ bool process_pseudo_control(uint16_t keycode, keyrecord_t *record) {
     }
     return(true);
 }
-
 
 void keyboard_post_init_user(void) {
   // Customise these values to desired behaviour
