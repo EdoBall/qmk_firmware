@@ -31,3 +31,23 @@
 #define RGBLIGHT_EFFECT_BREATHING
 #define RGBLIGHT_EFFECT_RAINBOW_MOOD
 
+// for AZOTEQ IQS5xx
+// originaly assigned for MISO
+#define I2C1_SCL_PIN GP7
+// originaly assigned for for MOSI
+#define I2C1_SDA_PIN GP6
+#define I2C_DRIVER I2CD1
+#define F_SCL 100000
+
+// for SSCI-080798(IQS525)
+// #define AZOTEQ_IQS5XX_WIDTH_MM 30
+// #define AZOTEQ_IQS5XX_HEIGHT_MM 30
+// #define AZOTEQ_IQS5XX_RESOLUTION_X 1024
+// #define AZOTEQ_IQS5XX_RESOLUTION_Y 1024
+
+// SSCI-080798 is located upside down.
+// #define AZOTEQ_IQS5XX_ROTATION_180 TRUE
+
+// TPS443 is located normaly.
+#define AZOTEQ_IQS5XX_TPS43 1
+#undef AZOTEQ_IQS5XX_ROTATION_180

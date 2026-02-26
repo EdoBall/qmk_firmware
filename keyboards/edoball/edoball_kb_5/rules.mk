@@ -1,11 +1,10 @@
 # This file intentionally left blank
 SRC += matrix.c
 CUSTOM_MATRIX = lite
-POINTING_DEVICE_ENABLE = yes
-POINTING_DEVICE_DRIVER = custom
-# RGBLIGHT_ENABLE = yes
-# WS2812_DRIVER_REQUIRED = yes
-# WS2812_DRIVER = vendor
-
+#POINTING_DEVICE_ENABLE = yes
+#POINTING_DEVICE_DRIVER = custom
 KEY_OVERRIDE_ENABLE = yes
-# CONSOLE_ENABLE = yes
+
+# for IQS525
+#I2C_DRIVER_REQUIRED = yes
+# POINTING_DEVICE_DRIVER = azoteq_iqs5xx

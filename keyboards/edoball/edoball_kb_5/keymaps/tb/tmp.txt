@@ -1,0 +1,733 @@
+ソール
+06:47:36 
+// probe at 102.403,115.601 is z=2.490625
+06:47:36 
+// probe at 102.403,115.601 is z=2.490625
+06:47:38 
+// probe at 102.403,115.601 is z=2.489375
+06:47:38 
+// probe at 102.403,115.601 is z=2.489375
+06:47:38 
+// Result is z=2.490000
+06:47:38 
+// Result is z=2.490000
+06:47:38 
+// led_enable : 0
+06:47:38 
+// led_enable : 0
+06:47:38 
+// status_macro: 'status_meshing'
+06:47:38 
+// status_macro: 'status_meshing'
+06:47:38 
+// fuzz_enable : 0
+06:47:38 
+// fuzz_enable : 0
+06:47:38 
+// fuzz_min : 0.000000
+06:47:38 
+// fuzz_min : 0.000000
+06:47:38 
+// fuzz_max : 4.000000
+06:47:38 
+// fuzz_max : 4.000000
+06:47:38 
+// probe_dock_enable: 0
+06:47:38 
+// probe_dock_enable: 0
+06:47:38 
+// attach_macro: 'Attach_Probe'
+06:47:38 
+// attach_macro: 'Attach_Probe'
+06:47:38 
+// detach_macro: 'Dock_Probe'
+06:47:38 
+// detach_macro: 'Dock_Probe'
+06:47:38 
+// 0 object points, clamping to bed mesh [(20.0, 15.0) (230.0, 230.0)]
+06:47:38 
+// 0 object points, clamping to bed mesh [(20.0, 15.0) (230.0, 230.0)]
+06:47:38 
+// Object bounds, clamped to the bed_mesh: (20.0, 15.0), (230.0, 230.0)
+06:47:38 
+// Object bounds, clamped to the bed_mesh: (20.0, 15.0), (230.0, 230.0)
+06:47:38 
+// Algorithm: bicubic
+06:47:38 
+// Algorithm: bicubic
+06:47:38 
+// Points: x: 8, y: 8
+06:47:38 
+// Points: x: 8, y: 8
+06:47:38 
+// Generating new points...
+06:47:38 
+// Generating new points...
+06:47:38 
+// bed_mesh: generated points
+// Index | Tool Adjusted | Probe
+06:47:38 
+// bed_mesh: generated points
+// Index | Tool Adjusted | Probe
+06:47:38 
+// 0 | (2.4, 10.6) | (20.0, 15.0)
+06:47:38 
+// 0 | (2.4, 10.6) | (20.0, 15.0)
+06:47:38 
+// 1 | (32.4, 10.6) | (50.0, 15.0)
+06:47:38 
+// 1 | (32.4, 10.6) | (50.0, 15.0)
+06:47:38 
+// 2 | (62.4, 10.6) | (80.0, 15.0)
+06:47:38 
+// 2 | (62.4, 10.6) | (80.0, 15.0)
+06:47:38 
+// 3 | (92.4, 10.6) | (110.0, 15.0)
+06:47:38 
+// 3 | (92.4, 10.6) | (110.0, 15.0)
+06:47:38 
+// 4 | (122.4, 10.6) | (140.0, 15.0)
+06:47:38 
+// 4 | (122.4, 10.6) | (140.0, 15.0)
+06:47:38 
+// 5 | (152.4, 10.6) | (170.0, 15.0)
+06:47:38 
+// 5 | (152.4, 10.6) | (170.0, 15.0)
+06:47:38 
+// 6 | (182.4, 10.6) | (200.0, 15.0)
+06:47:38 
+// 6 | (182.4, 10.6) | (200.0, 15.0)
+06:47:38 
+// 7 | (212.4, 10.6) | (230.0, 15.0)
+06:47:38 
+// 7 | (212.4, 10.6) | (230.0, 15.0)
+06:47:38 
+// 8 | (212.4, 41.3) | (230.0, 45.7)
+06:47:38 
+// 8 | (212.4, 41.3) | (230.0, 45.7)
+06:47:38 
+// 9 | (182.4, 41.3) | (200.0, 45.7)
+06:47:38 
+// 9 | (182.4, 41.3) | (200.0, 45.7)
+06:47:38 
+// 10 | (152.4, 41.3) | (170.0, 45.7)
+06:47:38 
+// 10 | (152.4, 41.3) | (170.0, 45.7)
+06:47:38 
+// 11 | (122.4, 41.3) | (140.0, 45.7)
+06:47:38 
+// 11 | (122.4, 41.3) | (140.0, 45.7)
+06:47:38 
+// 12 | (92.4, 41.3) | (110.0, 45.7)
+06:47:38 
+// 13 | (62.4, 41.3) | (80.0, 45.7)
+06:47:38 
+// 14 | (32.4, 41.3) | (50.0, 45.7)
+06:47:38 
+// 15 | (2.4, 41.3) | (20.0, 45.7)
+06:47:38 
+// 16 | (2.4, 72.0) | (20.0, 76.4)
+06:47:38 
+// 17 | (32.4, 72.0) | (50.0, 76.4)
+06:47:38 
+// 18 | (62.4, 72.0) | (80.0, 76.4)
+06:47:38 
+// 19 | (92.4, 72.0) | (110.0, 76.4)
+06:47:38 
+// 20 | (122.4, 72.0) | (140.0, 76.4)
+06:47:38 
+// 21 | (152.4, 72.0) | (170.0, 76.4)
+06:47:38 
+// 22 | (182.4, 72.0) | (200.0, 76.4)
+06:47:38 
+// 23 | (212.4, 72.0) | (230.0, 76.4)
+06:47:38 
+// 24 | (212.4, 102.7) | (230.0, 107.1)
+06:47:38 
+// 25 | (182.4, 102.7) | (200.0, 107.1)
+06:47:38 
+// 26 | (152.4, 102.7) | (170.0, 107.1)
+06:47:38 
+// 27 | (122.4, 102.7) | (140.0, 107.1)
+06:47:38 
+// 28 | (92.4, 102.7) | (110.0, 107.1)
+06:47:38 
+// 29 | (62.4, 102.7) | (80.0, 107.1)
+06:47:38 
+// 30 | (32.4, 102.7) | (50.0, 107.1)
+06:47:38 
+// 31 | (2.4, 102.7) | (20.0, 107.1)
+06:47:38 
+// 32 | (2.4, 133.4) | (20.0, 137.8)
+06:47:38 
+// 33 | (32.4, 133.4) | (50.0, 137.8)
+06:47:38 
+// 34 | (62.4, 133.4) | (80.0, 137.8)
+06:47:38 
+// 35 | (92.4, 133.4) | (110.0, 137.8)
+06:47:38 
+// 36 | (122.4, 133.4) | (140.0, 137.8)
+06:47:38 
+// 37 | (152.4, 133.4) | (170.0, 137.8)
+06:47:38 
+// 38 | (182.4, 133.4) | (200.0, 137.8)
+06:47:38 
+// 39 | (212.4, 133.4) | (230.0, 137.8)
+06:47:38 
+// 40 | (212.4, 164.2) | (230.0, 168.6)
+06:47:38 
+// 41 | (182.4, 164.2) | (200.0, 168.6)
+06:47:38 
+// 42 | (152.4, 164.2) | (170.0, 168.6)
+06:47:38 
+// 43 | (122.4, 164.2) | (140.0, 168.6)
+06:47:38 
+// 44 | (92.4, 164.2) | (110.0, 168.6)
+06:47:38 
+// 45 | (62.4, 164.2) | (80.0, 168.6)
+06:47:38 
+// 46 | (32.4, 164.2) | (50.0, 168.6)
+06:47:38 
+// 47 | (2.4, 164.2) | (20.0, 168.6)
+06:47:38 
+// 48 | (2.4, 194.9) | (20.0, 199.3)
+06:47:38 
+// 49 | (32.4, 194.9) | (50.0, 199.3)
+06:47:38 
+// 50 | (62.4, 194.9) | (80.0, 199.3)
+06:47:38 
+// 51 | (92.4, 194.9) | (110.0, 199.3)
+06:47:38 
+// 52 | (122.4, 194.9) | (140.0, 199.3)
+06:47:38 
+// 53 | (152.4, 194.9) | (170.0, 199.3)
+06:47:38 
+// 54 | (182.4, 194.9) | (200.0, 199.3)
+06:47:38 
+// 55 | (212.4, 194.9) | (230.0, 199.3)
+06:47:38 
+// 56 | (212.4, 225.6) | (230.0, 230.0)
+06:47:38 
+// 57 | (182.4, 225.6) | (200.0, 230.0)
+
+
+
+// update the printer config file and restart the printer.
+06:52:47 
+// Bed Mesh state has been saved to profile [default]
+// for the current session. The SAVE_CONFIG command will
+// update the printer config file and restart the printer.
+06:52:54 
+echo: Bed mesh calibrate complete
+06:52:55 
+// Klipper state: Disconnect
+06:53:02 
+// Klipper state: Ready
+06:53:02 
+$ _SET_TIMELAPSE_SETUP ENABLE=True VERBOSE=False PARK_ENABLE=False PARK_POS=back_left CUSTOM_POS_X=10.0 CUSTOM_POS_Y=10.0 CUSTOM_POS_DZ=0.0 TRAVEL_SPEED=100 RETRACT_SPEED=15 EXTRUDE_SPEED=15 RETRACT_DISTANCE=1.0 EXTRUDE_DISTANCE=1.0 PARK_TIME=0.1 FW_RETRACT=False
+06:53:02 
+$ HYPERLAPSE ACTION=STOP
+06:56:49 
+File opened:.cache/Dip (cut)_magnet_hole.gcode Size:1164857
+06:56:49 
+File selected
+06:56:53 
+// Run Current: 0.80A Hold Current: 0.80A
+06:56:54 
+// Run Current: 1.00A Hold Current: 1.00A
+06:56:54 
+// Run Current: 0.90A Hold Current: 0.90A
+06:56:55 
+// Run Current: 1.00A Hold Current: 1.00A
+06:56:56 
+// Run Current: 0.80A Hold Current: 0.80A
+06:56:57 
+// Run Current: 1.00A Hold Current: 1.00A
+06:57:08 
+// idle_timeout: Timeout set to 43200.00 s
+06:57:08 
+// Variable Saved
+06:57:18 
+// Filament width sensor is already Off
+06:57:18 
+// action:cancel
+06:57:18 
+// Variable Saved
+06:57:18 
+// Variable Saved
+06:57:47 
+File opened:.cache/Dip (cut)_magnet_hole.gcode Size:1164857
+06:57:47 
+File selected
+06:57:51 
+// Run Current: 0.80A Hold Current: 0.80A
+06:57:54 
+// Run Current: 1.00A Hold Current: 1.00A
+06:57:55 
+// Run Current: 0.90A Hold Current: 0.90A
+06:57:58 
+// Run Current: 1.00A Hold Current: 1.00A
+06:57:59 
+// Run Current: 0.80A Hold Current: 0.80A
+06:58:00 
+// Run Current: 1.00A Hold Current: 1.00A
+06:58:26 
+// Run Current: 1.07A Hold Current: 1.07A
+06:58:27 
+// Run Current: 1.07A Hold Current: 1.07A
+07:00:26 
+echo: Nozzle cleared
+07:00:36 
+echo: Nozzle cooled
+07:00:39 
+// Run Current: 0.80A Hold Current: 0.80A
+07:00:45 
+// Run Current: 1.00A Hold Current: 1.00A
+07:00:46 
+// Run Current: 0.90A Hold Current: 0.90A
+07:00:49 
+// Run Current: 1.00A Hold Current: 1.00A
+07:00:50 
+// Run Current: 0.80A Hold Current: 0.80A
+07:00:51 
+// Run Current: 1.00A Hold Current: 1.00A
+07:01:03 
+// Run Current: 1.07A Hold Current: 1.07A
+07:01:03 
+// Run Current: 1.07A Hold Current: 1.07A
+07:01:29 
+// probe at 120.000,120.000 is z=-2.574531
+07:03:05 
+// Probe samples exceed tolerance. Retrying...
+07:03:16 
+// probe at 120.000,120.000 is z=6.986875
+07:03:20 
+// probe at 120.000,120.000 is z=-2.591719
+07:03:20 
+// Probe samples exceed tolerance. Retrying...
+07:03:22 
+// probe at 120.000,120.000 is z=2.194687
+07:03:25 
+// probe at 120.000,120.000 is z=-2.593281
+07:03:25 
+// Probe samples exceed tolerance. Retrying...
+07:03:27 
+// probe at 120.000,120.000 is z=2.191875
+07:03:31 
+// probe at 120.000,120.000 is z=-2.592813
+07:03:31 
+// Probe samples exceed tolera
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+07:02:17 
+// Probe samples exceed tolerance. Retrying...
+07:02:30 
+// probe at 120.000,120.000 is z=-2.584063
+07:02:32 
+// probe at 120.000,120.000 is z=2.204375
+07:02:32 
+// Probe samples exceed tolerance. Retrying...
+07:02:35 
+// probe at 120.000,120.000 is z=-2.584063
+07:02:37 
+// probe at 120.000,120.000 is z=2.204219
+07:02:37 
+// Probe samples exceed tolerance. Retrying...
+07:02:40 
+// probe at 120.000,120.000 is z=-2.585156
+07:02:42 
+// probe at 120.000,120.000 is z=2.203906
+07:02:42 
+// Probe samples exceed tolerance. Retrying...
+07:02:45 
+// probe at 120.000,120.000 is z=-2.596719
+07:02:47 
+// probe at 120.000,120.000 is z=2.188750
+07:02:47 
+// Probe samples exceed tolerance. Retrying...
+07:02:50 
+// probe at 120.000,120.000 is z=-2.585938
+07:02:52 
+// probe at 120.000,120.000 is z=2.199219
+07:03:05 
+// Probe samples exceed tolerance. Retrying...
+07:03:16 
+// probe at 120.000,120.000 is z=6.986875
+07:03:20 
+// probe at 120.000,120.000 is z=-2.591719
+07:03:20 
+// Probe samples exceed tolerance. Retrying...
+07:03:22 
+// probe at 120.000,120.000 is z=2.194687
+07:03:25 
+// probe at 120.000,120.000 is z=-2.593281
+07:03:25 
+// Probe samples exceed tolerance. Retrying...
+07:03:27 
+// probe at 120.000,120.000 is z=2.191875
+07:03:31 
+// probe at 120.000,120.000 is z=-2.592813
+07:03:31 
+// Probe samples exceed tolera
+
+
+
+
+
+07:25:57 
+// Run Current: 0.80A Hold Current: 0.80A
+07:26:00 
+// Run Current: 1.00A Hold Current: 1.00A
+07:26:01 
+// Run Current: 0.90A Hold Current: 0.90A
+07:26:04 
+// Run Current: 1.00A Hold Current: 1.00A
+07:26:05 
+// Run Current: 0.80A Hold Current: 0.80A
+07:26:06 
+// Run Current: 1.00A Hold Current: 1.00A
+07:26:14 
+// Run Current: 1.07A Hold Current: 1.07A
+07:26:14 
+// Run Current: 1.07A Hold Current: 1.07A
+07:26:14 
+echo: Position init complete
+07:28:02 
+echo: Nozzle cleared
+07:28:25 
+echo: Nozzle cooled
+07:28:28 
+// Run Current: 0.80A Hold Current: 0.80A
+07:28:34 
+// Run Current: 1.00A Hold Current: 1.00A
+07:28:34 
+// Run Current: 0.90A Hold Current: 0.90A
+07:28:38 
+// Run Current: 1.00A Hold Current: 1.00A
+07:28:39 
+// Run Current: 0.80A Hold Current: 0.80A
+07:28:39 
+// Run Current: 1.00A Hold Current: 1.00A
+07:28:52 
+// Run Current: 1.07A Hold Current: 1.07A
+07:28:52 
+// Run Current: 1.07A Hold Current: 1.07A
+07:29:18 
+// probe at 120.000,120.000 is z=-2.565469
+07:29:20 
+// probe at 120.000,120.000 is z=2.224062
+07:29:20 
+// Probe samples exceed tolerance. Retrying...
+07:29:23 
+// probe at 120.000,120.000 is z=-2.569844
+07:29:25 
+// probe at 120.000,120.000 is z=2.217969
+07:29:25 
+// Probe samples exceed tolerance. Retrying...
+07:29:26 
+// probe at 120.000,120.000 is z=7.000937
+07:29:31 
+// probe at 120.000,120.000 is z=-2.567656
+07:29:31 
+// Probe samples exceed tolerance. Retrying...
+07:29:33 
+// probe at 120.000,120.000 is z=2.221250
+07:29:34 
+// probe at 120.000,120.000 is z=7.002969
+07:29:34 
+// Probe samples exceed tolerance. Retrying...
+07:29:39 
+// probe at 120.000,120.000 is z=-2.569219
+07:29:40 
+// Probe samples exceed tolerance. Retrying...
+07:30:22 
+// Result is z=-2.576771
+
+
+9:25 
+// Probe samples exceed tolerance. Retrying...
+07:29:26 
+// probe at 120.000,120.000 is z=7.000937
+07:29:31 
+// probe at 120.000,120.000 is z=-2.567656
+07:29:31 
+// Probe samples exceed tolerance. Retrying...
+07:29:33 
+// probe at 120.000,120.000 is z=2.221250
+07:29:34 
+// probe at 120.000,120.000 is z=7.002969
+07:29:34 
+// Probe samples exceed tolerance. Retrying...
+07:29:39 
+// probe at 120.000,120.000 is z=-2.569219
+07:29:40 
+// probe at 120.000,120.000 is z=2.210937
+07:29:40 
+// Probe samples exceed tolerance. Retrying...
+07:29:42 
+// probe at 120.000,120.000 is z=6.994687
+07:29:46 
+// probe at 120.000,120.000 is z=-2.572500
+07:30:00 
+// Probe samples exceed tolerance. Retrying...
+07:30:12 
+// probe at 120.000,120.000 is z=-2.571406
+07:30:15 
+// probe at 120.000,120.000 is z=-2.576094
+07:30:17 
+// probe at 120.000,120.000 is z=-2.577500
+07:30:20 
+// probe at 120.000,120.000 is z=-2.578750
+07:30:22 
+// probe at 120.000,120.000 is z=-2.576719
+07:30:22 
+// Result is z=-2.576771
+07:30:22 
+X:120.000 Y:120.000 Z:-2.577 E:80.000
+
+
+
+fluidd
+	Dip (cut)_magnet_hole.gcode		6m 28s
+カメラ｜カメラ
+Defaultfps: 08
+ツール
+マクロ
+
+未分類 
+61
+ファン＆出力
+Part Fan
+​
+0
+%
+Board Fan
+オン
+Auxiliary Cooling Fan
+​
+0
+%
+Cooling Fan
+​
+0
+%
+Hotend Fan 2
+オフ
+Chamber Circulation Fan
+​
+0
+%
+Hotend Fan
+オフ
+Sound
+Ctlyd
+Beeper
+Caselight
+プリンター制限
+速度
+​
+600
+mm/s
+正方形角速度
+​
+8
+mm/s
+加速度
+​
+50
+mm/s^2
+加減速
+​
+25
+mm/s^2
+サーマル
+Chamber	off	23.4°C	/	
+​
+0
+°C
+Extruder	off	43.8°C	/	
+​
+0
+°C
+Heater Bed	14%	45.0°C	/	
+​
+45
+°C
+コンソール
+22:12:17 
+// Shutdown due to webhooks request
+// Once the underlying issue is corrected, use the
+// "FIRMWARE_RESTART" command to reset the firmware, reload the
+// config, and restart the host software.
+// Printer is shutdown
+22:12:17 
+!! Shutdown due to webhooks request
+22:12:21 
+$ FIRMWARE_RESTART
+22:12:21 
+// Klipper state: Disconnect
+22:12:28 
+// Klipper state: Ready
+22:12:29 
+$ _SET_TIMELAPSE_SETUP ENABLE=True VERBOSE=False PARK_ENABLE=False PARK_POS=back_left CUSTOM_POS_X=10.0 CUSTOM_POS_Y=10.0 CUSTOM_POS_DZ=0.0 TRAVEL_SPEED=100 RETRACT_SPEED=15 EXTRUDE_SPEED=15 RETRACT_DISTANCE=1.0 EXTRUDE_DISTANCE=1.0 PARK_TIME=0.1 FW_RETRACT=False
+22:12:29 
+$ HYPERLAPSE ACTION=STOP
+23:45:36 
+// Variable Saved
+23:45:39 
+// Run Current: 0.80A Hold Current: 0.80A
+23:45:43 
+// Run Current: 1.00A Hold Current: 1.00A
+23:45:43 
+// Run Current: 0.90A Hold Current: 0.90A
+23:45:47 
+// Run Current: 1.00A Hold Current: 1.00A
+23:45:47 
+// Run Current: 0.80A Hold Current: 0.80A
+23:45:48 
+// Run Current: 1.00A Hold Current: 1.00A
+23:45:56 
+// Run Current: 1.07A Hold Current: 1.07A
+23:45:56 
+// Run Current: 1.07A Hold Current: 1.07A
+23:45:57 
+echo: Position init complete
+23:47:47 
+echo: Nozzle cleared
+23:48:08 
+echo: Nozzle cooled
+23:48:11 
+// Run Current: 0.80A Hold Current: 0.80A
+23:48:17 
+// Run Current: 1.00A Hold Current: 1.00A
+23:48:18 
+// Run Current: 0.90A Hold Current: 0.90A
+23:48:21 
+// Run Current: 1.00A Hold Current: 1.00A
+23:48:22 
+// Run Current: 0.80A Hold Current: 0.80A
+23:48:22 
+// Run Current: 1.00A Hold Current: 1.00A
+23:48:35 
+// Run Current: 1.07A Hold Current: 1.07A
+23:48:35 
+// Run Current: 1.07A Hold Current: 1.07A
+23:49:00 
+// probe at 120.000,120.000 is z=4.791562
+23:49:01 
+// probe at 120.000,120.000 is z=9.571406
+23:49:01 
+// Probe samples exceed tolerance. Retrying...
+23:49:03 
+// probe at 120.000,120.000 is z=14.363281
+23:49:09 
+// probe at 120.000,120.000 is z=-2.618281
+23:49:09 
+// Probe samples exceed tolerance. Retrying...
+23:49:11 
+// probe at 120.000,120.000 is z=2.169688
+23:49:12 
+// probe at 120.000,120.000 is z=6.962500
+23:49:12 
+// Probe samples exceed tolerance. Retrying...
+23:49:14 
+// probe at 120.000,120.000 is z=11.578906
+23:49:19 
+// probe at 120.000,120.000 is z=-2.622969
+23:49:19 
+// Probe samples exceed tolerance. Retrying...
+23:49:21 
+// probe at 120.000,120.000 is z=2.165313
+23:49:22 
+// probe at 120.000,120.000 is z=6.945781
+23:49:22 
+// Probe samples exceed tolerance. Retrying...
+23:49:24 
+// probe at 120.000,120.000 is z=11.729375
+23:49:26 
+// probe at 120.000,120.000 is z=16.504688
+23:49:40 
+// Probe samples exceed tolerance. Retrying...
+23:49:54 
+// probe at 120.000,120.000 is z=21.288281
+23:50:01 
+// probe at 120.000,120.000 is z=-2.637031
+23:50:01 
+// Probe samples exceed tolerance. Retrying...
+23:50:03 
+// probe at 120.000,120.000 is z=2.151563
+23:50:04 
+// probe at 120.000,120.000 is z=6.941563
+23:50:04 
+// Probe samples exceed tolerance. Retrying...
+23:50:06 
+// probe at 120.000,120.000 is z=11.729844
+23:50:11 
+// probe at 120.000,120.000 is z=-2.638906
+23:50:11 
+// Probe samples exceed tolerance. Retrying...
+23:50:13 
+// probe at 120.000,120.000 is z=2.149219
+23:50:15 
+// probe at 120.000,120.000 is z=6.936094
+23:50:15 
+// Probe samples exceed tolerance. Retrying...
+23:50:16 
+// probe at 120.000,120.000 is z=11.724844
+23:50:22 
+// probe at 120.000,120.000 is z=-2.640156
+23:50:36 
+// Probe samples exceed tolerance. Retrying...
+23:50:52 
+// probe at 120.000,120.000 is z=11.712188
+23:50:52 
+// Probe samples exceed tolerance. Retrying...
+23:50:54 
+// probe at 120.000,120.000 is z=16.488750
+23:51:00 
+// probe at 120.000,120.000 is z=-2.645156
+23:51:47 
+// probe at 120.000,120.000 is z=11.705000
+
+​
+印刷ジョブ
+‎/
+​
+Gcode Preview
+レイヤー
+​
+0
+進捗
+​
+0
+レイヤー
+0
+現在のレイヤーの高さ
+0
+© 2026 fluidd: v1.19.0-6184c739
+
+
+
+
