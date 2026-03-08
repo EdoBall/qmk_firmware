@@ -5,38 +5,13 @@
 #include "print.h"
 #include "debug.h"
 
+#include "keymap.h"
+#include "iqs5xx.h"
+#include "key_overrides.h"
+
 #define DEBUG
 
-#define TIME_OUT 1000
-#define TH_ON 10
-#define TH_OFF 8
-
-// layers:
-#define _QWERTY 0
-#define _LOWER  1
-#define _RAISE  2
-#define _LOWERJ 3
-#define _CURSOR 4
-#define _TENKEY 5
-#define _MOUSE  6
-#define _TCURSOR 7
-#define _FN     14
-#define _ADJUST 15
-
-#define MAX_KEY_OVERRIDES 35
-
-// Keyboard Control Mode:
-// 0: normal(usus), 1: us key on jp os, 2: emacs, 3: vi, 4: wasd, 5: Touch wall invert mode, 
-#define M_USUS 0
-#define M_USJP 1
-#define M_EMACS 2
-#define M_VI 3
-#define M_WASD 4
-#define M_TENKEY 5
-#define M_PCTL_INV 6
-#define M_CURSOR_ON 7
-
-static uint16_t kb_mode = 1 << M_USUS;
+static uint16_t kb_mode = 1 << M_USJP; // Default: US-JP mode
 static char debug_str[256];
 
 uint8_t readMatrixCol(uint8_t col_index);
@@ -60,152 +35,15 @@ static uint8_t cursor_kc[][2] =
 #define MM_PCB 4
 #define MM_TW 5
 
-enum custom_keycodes {
-    CC_TW1 = SAFE_RANGE,  // touch wall 1
-    CC_PCB1, // touch key PCB 1 (on the main PCB)
-    CC_PR1,  // touch key 2 (palm rest)
-    CC_PCTL, // Pseudo-Control
-    CC_FN,
-    CC_LOWER,
-    CC_RAISE,
-    CC_ADJUST,
-    CC_INFO,
-    CC_TBUP,
-    CC_TBDWN,
-    CC_USUS,
-    CC_USJP,
-    CC_EMACS,
-    CC_CTL_INV, // ctrl key invert
-    CC_TENKEY,
-    CC_SPLW,
-    CC_ATTUP,
-    CC_ATTDN,
-    CC_GACUP,
-    CC_GACDN,
-    CC_PRXUP,
-    CC_PRXDN,
-    CC_TMSUP,
-    CC_TMSDN,
-    CC_TMCUP,
-    CC_TMCDN,
-    CC_DUMP,
-    CC_SCRL,
-    CC_T1,
-    CC_T2,
-    CC_T3,
-    CC_T4,
-    CC_DUMMY
-};
 
 // scroll
 #define SCRL_MAG 0.02
 #define SCRL_MAG_TWO_FINGERS 0.02
-static bool scroll_flag = false;
 static uint8_t my_modifier = 0;
+#ifdef AZOTEQ_IQS5XX_TPS43
+static bool scroll_flag = false;
+#endif
 
-// Key Override
-// Mode: NoOverride, US(Key)2JIS(OS), JIS2US,
-// Cursor Mode: No, Ctrl + Emacs (the touch key cancellation), Ctrl + the touch key + Emacs, vi(with the touch key),
-const key_override_t *key_overrides[MAX_KEY_OVERRIDES];
-static int8_t n_overrides;
-static int8_t pos_dummy_override; // for on/off cursor overrides
-
-// Perform as a US keyboard on JP OS systems
-const key_override_t *us_key_on_jp_os_overrides[] =
-    {
-     &ko_make_with_layers(MOD_MASK_SHIFT, QK_GESC, JP_TILD, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_2, JP_AT, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_6, JP_CIRC, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_7, JP_AMPR, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_8, JP_ASTR, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_9, JP_LPRN, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_0, JP_RPRN, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_MINS, JP_UNDS, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_EQL, JP_PLUS, 1 << _QWERTY),
-     &ko_make_with_layers(0, KC_EQL, JP_EQL, 1 << _QWERTY),
-     &ko_make_with_layers(0, KC_LBRC, JP_LBRC, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_RBRC, JP_RCBR, 1 << _QWERTY),
-     &ko_make_with_layers(0, KC_RBRC, JP_RBRC, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_BSLS, JP_PIPE, 1 << _QWERTY),
-     &ko_make_with_layers(0, KC_BSLS, JP_YEN, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_SCLN, JP_COLN, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_QUOT, JP_DQUO, 1 << _QWERTY),
-     &ko_make_with_layers(0, KC_QUOT, JP_QUOT, 1 << _QWERTY),
-     /*
-     &ko_make_with_layers(MOD_MASK_SHIFT, QK_GESC, JP_TILD,  1 << _LOWER),
-     &ko_make_with_layers(0, JP_KC_2, JP_AT, 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_6, JP_CIRC, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_7, JP_AMPR, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_8, JP_ASTR, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_9, JP_LPRN, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_0, JP_RPRN, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_MINS, JP_UNDS, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_EQL, JP_PLUS, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(0, KC_EQL, JP_EQL, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(0, KC_LBRC, JP_LBRC, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_RBRC, JP_RCBR, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(0, KC_RBRC, JP_RBRC, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_BSLS, JP_PIPE, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(0, KC_BSLS, JP_YEN, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_SCLN, JP_COLN, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(MOD_MASK_SHIFT, KC_QUOT, JP_DQUO, 1 << _QWERTY | 1 << _LOWER),
-     &ko_make_with_layers(0, KC_QUOT, JP_QUOT, 1 << _QWERTY | 1 << _LOWER),
-     */
-     NULL
-    };
-
-const key_override_t *emacs_overrides[] =
-    {
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_F, KC_RIGHT, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_B, KC_LEFT, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_P, KC_UP, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_N, KC_DOWN, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_A, KC_HOME, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_E, KC_END, 1 << _QWERTY),
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_D, KC_DEL, 1 << _QWERTY),
-     //     &ko_make_with_layers(MOD_MASK_CTRL, KC_V, KC_PGDN, 1 << _QWERTY),
-     //     &ko_make_with_layers(MOD_MASK_ALT,  KC_V, KC_PGUP, 1 << _QWERTY),
-     NULL
-    };
-
-const key_override_t *vi_overrides[] =
-    {
-     // KC_GRV override depends on OS
-     &ko_make_basic(0, KC_H, KC_LEFT),
-     &ko_make_basic(0, KC_J, KC_DOWN),
-     &ko_make_basic(0, KC_K, KC_UP),
-     &ko_make_basic(0, KC_L, KC_RIGHT),
-     NULL
-    };
-
-const key_override_t *game_overrides[] =
-    {
-     // KC_GRV override depends on OS
-     &ko_make_basic(MOD_MASK_CTRL, KC_W, KC_UP),
-     &ko_make_basic(MOD_MASK_CTRL, KC_A, KC_LEFT),
-     &ko_make_basic(MOD_MASK_CTRL, KC_S, KC_DOWN),
-     &ko_make_basic(MOD_MASK_CTRL, KC_D, KC_RIGHT),
-     NULL
-    };
-
-const key_override_t *tenkey_cursor_overrides[] =
-    {
-     // KC_GRV override depends on OS
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_P8, KC_UP, 1 << _TENKEY),
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_P4, KC_LEFT, 1 << _TENKEY),
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_P2, KC_DOWN, 1 << _TENKEY),
-     &ko_make_with_layers(MOD_MASK_CTRL, KC_P6, KC_RIGHT, 1 << _TENKEY),
-     NULL
-    };
-
-const key_override_t dummy_override = ko_make_basic(0, CC_DUMMY, CC_DUMMY); // no effect
-
-const key_override_t *dummy_overrides[] =
-    {
-     // KC_GRV override depends on OS
-     &dummy_override,
-     NULL
-    };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
@@ -263,14 +101,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    KC_TAB,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,   KC_NO, KC_NO, KC_NO, \
    KC_LCTL, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,   KC_NO, KC_NO, KC_NO, \
    KC_LSFT, _______, _______, _______, _______, _______, _______, _______, _______, _______, S(KC_LEFT),KC_UP,S(KC_RIGHT),KC_NO,KC_NO,KC_NO, \
-   KC_LCTL, _______, _______, _______, _______, _______, _______, _______, _______, _______, KC_LEFT, KC_DOWN,KC_RIGHT,   KC_NO, KC_NO, KC_NO  \
+   KC_LCTL, _______, _______, _______, KC_SPC,  _______, _______, KC_SPC,  _______, _______, KC_LEFT, KC_DOWN,KC_RIGHT,   KC_NO, KC_NO, KC_NO  \
                                                                         ), \
     [_TENKEY] = LAYOUT_ortho_16x5(                                       \
    QK_GESC, KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_NUM,  KC_PSLS,KC_PAST,   KC_PMNS, KC_BSPC, KC_MINS, KC_EQL,  CC_PR1,CC_PCB1,CC_TW1, \
    KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_P7,   KC_P8,   KC_P9,    KC_PPLS, KC_P,    KC_LBRC, KC_RBRC, KC_NO, KC_NO, KC_NO, \
    KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_P4,   KC_P5,   KC_P6,    KC_PPLS, KC_SCLN, KC_QUOT, KC_ENT,  KC_NO, KC_NO, KC_NO, \
-   KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_P1,   KC_P2,   KC_P3,    KC_PENT ,S(KC_LEFT),S(KC_UP),S(KC_RIGHT), KC_NO, KC_NO, KC_NO, \
-   KC_LCTL, CC_ADJUST, KC_LGUI, KC_LALT, KC_SPC, KC_ENT,   KC_P0,   KC_P0,   KC_PDOT,  KC_PENT, KC_LEFT, KC_DOWN, KC_RIGHT,KC_NO, KC_NO, KC_NO \
+   KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_P1,   KC_P2,   KC_P3,    KC_PENT ,S(KC_LEFT),KC_UP,S(KC_RIGHT), KC_NO, KC_NO, KC_NO, \
+   KC_LCTL, CC_ADJUST, KC_LGUI, KC_LALT, KC_SPC, KC_ENT,   KC_P0,   KC_P0,   KC_PDOT,  KC_PENT, KC_LEFT, CC_ADJUST, KC_RIGHT,KC_NO, KC_NO, KC_NO \
                                                                         ), \
     [_MOUSE] = LAYOUT_ortho_16x5(                                       \
    QK_GESC, KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  CC_PR1,CC_PCB1,CC_TW1, \
@@ -287,335 +125,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    KC_LCTL, _______, KC_LGUI, KC_LALT, KC_SPC, KC_ENT,   KC_INT4, KC_SPC,  KC_BSPC, KC_RALT, KC_LEFT,  CC_ADJUST, KC_DEL, KC_NO, KC_NO, KC_NO \
                                                                         ), \
     [_ADJUST] = LAYOUT_ortho_16x5(                                       \
-   TG(_CURSOR),CC_USUS,CC_USJP,CC_CTL_INV,TG(_TENKEY),CC_TBUP,CC_TBDWN,KC_7,KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  CC_PR1,CC_PCB1,CC_TW1, \
-   CC_INFO,CC_ATTDN,CC_ATTUP,CC_TMSDN,CC_TMSUP,    KC_T,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_NO, KC_NO, KC_NO, \
-   CC_DUMP,CC_GACDN,CC_GACUP,CC_TMCDN,CC_TMCUP,    KC_G,  KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,  KC_NO, KC_NO, KC_NO, \
-   KC_LSFT,CC_PRXDN,CC_PRXUP,_______,_______,      KC_B,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, KC_BSLS,KC_NO, KC_NO, KC_NO, \
-   KC_LCTL, _______, KC_LGUI, KC_LALT, KC_SPC, KC_ENT,   KC_INT4, KC_SPC,  KC_BSPC, KC_RALT, KC_LEFT,  CC_ADJUST, KC_DEL,KC_NO, KC_NO, KC_NO \
+   CC_CTL_INV,CC_USUS,CC_USJP,TG(_CURSOR),TG(_TENKEY),CC_TBUP,CC_TBDWN,KC_7,   KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  CC_PR1,CC_PCB1,CC_TW1, \
+   CC_INFO,   CC_ATTDN,CC_ATTUP,CC_TMSDN,CC_TMSUP,    KC_T,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_NO, KC_NO,  KC_NO, \
+   CC_CTL_INV,CC_GACDN,CC_GACUP,CC_TMCDN,CC_TMCUP,    KC_G,  KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,  KC_NO, KC_NO,  KC_NO, \
+   CC_DUMP,   CC_PRXDN,CC_PRXUP,_______,_______,      KC_B,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, KC_BSLS, KC_NO, KC_NO,  KC_NO, \
+   KC_LCTL,   _______, KC_LGUI, KC_LALT, KC_SPC,      KC_ENT,KC_INT4, KC_SPC,  KC_BSPC, KC_RALT, KC_LEFT,CC_ADJUST,KC_DEL,  KC_NO, KC_NO,  KC_NO \
                                                                         ), \
 };
-
-// Key override functions
-void init_overrides(void) {
-    key_overrides[0] = NULL;
-    n_overrides = 0;
-}
-
-int8_t add_overrides(const key_override_t **add) {
-    int8_t j;
-    for (j = 0; n_overrides < MAX_KEY_OVERRIDES - 1; n_overrides++, j++) {
-        key_overrides[n_overrides] = add[j];
-        if (key_overrides[n_overrides] == NULL) {
-            return(n_overrides);
-        }
-    }
-    key_overrides[n_overrides] = NULL; // n_overrides == MAX_KEY_OVERRIDES - 1
-    return(n_overrides);
-}
-
-int8_t set_overrides(const key_override_t **ko1, const key_override_t **ko2, const key_override_t **ko3) {
-    // ko1: basic (for layout) overrides, ko2: basic 2, ko3: cursor overrides
-    // The cursor overrides are enabled or disabled.
-    init_overrides();
-    add_overrides(ko1);
-    pos_dummy_override = add_overrides(ko2);
-    n_overrides++; // cursor overrides are disabled.
-    add_overrides(ko3);
-    return(n_overrides);
-}
-
-int8_t cursor_overrides_on(void) {
-    key_overrides[pos_dummy_override] =&dummy_override;
-    return(true);
-}
-
-int8_t cursor_overrides_off(void) {
-    key_overrides[pos_dummy_override] = NULL;
-    return(true);
-}
-
-/* for IQS5XX
-Switch Science IQS525:
-Global ATI C 3;
-Global ATI Target 500;
-
-TPS43:
-Global ATI C 1;
-Global ATI Target 700;
-Prox Th 23;Global Touch Multiplier - Set 16;Global Touch Multiplier - clear 12;t:0;df:7,6,250;
-*/
-
-#ifndef AZOTEQ_IQS5XX_ADDRESS
-#    define AZOTEQ_IQS5XX_ADDRESS (0x74 << 1)
-#endif
-#ifndef AZOTEQ_IQS5XX_TIMEOUT_MS
-#    define AZOTEQ_IQS5XX_TIMEOUT_MS 10
-#endif
-#define AZOTEQ_IQS5XX_REG_GLOBAL_ATI_C 0x056B
-#define AZOTEQ_IQS5XX_REG_ATI_TARGET 0x056D
-#define AZOTEQ_IQS5XX_REG_PROX_THRESHOLD 0x0594
-#define AZOTEQ_IQS5XX_REG_GLOBAL_TOUCH_MULTIPLIER_SET 0x0596
-#define AZOTEQ_IQS5XX_REG_GLOBAL_TOUCH_MULTIPLIER_CLEAR 0x0597
-#define AZOTEQ_IQS5XX_REG_NUMBER_OF_FINGERS 0x0011
-
-// 2Bytes operation functions
-uint16_t swap16(uint16_t org) {
-    return(org << 8 | org >> 8);
-}
-
-uint16_t get_reg16(uint16_t reg_addr) {
-    // return azoteq iqs5xx's register value at reg_addr (16bit)
-    // Error occured: return 0
-    uint8_t read_data[2];
-    uint16_t ret;
-    i2c_status_t status;
-    
-    status = i2c_read_register16(AZOTEQ_IQS5XX_ADDRESS, reg_addr, read_data, 2, AZOTEQ_IQS5XX_TIMEOUT_MS);
-    if (status == I2C_STATUS_SUCCESS) {
-        ret = read_data[0] << 8 | read_data[1];
-        return(ret);
-    } else {
-        dprint("I2C error");
-    }
-    return(0);
-}
-
-uint16_t set_reg16(uint16_t reg_addr, uint16_t value){
-    uint8_t reg_data[2];
-    uint16_t current_value;
-    i2c_status_t status;
-
-    current_value = get_reg16(reg_addr);
-    reg_data[0] = value >> 8;
-    reg_data[1] = (uint8_t) value;
-    status = i2c_write_register16(AZOTEQ_IQS5XX_ADDRESS, reg_addr, reg_data, 2, AZOTEQ_IQS5XX_TIMEOUT_MS);
-    if (status == I2C_STATUS_SUCCESS) {
-        sprintf(debug_str, "%x:%d > %d;", reg_addr, current_value, value);
-        dprint(debug_str);
-        return(value);
-    } else {
-        dprint("I2C error");
-    }
-    return(0);
-}
-
-uint16_t get_ati_target2(void) {
-    return(get_reg16(AZOTEQ_IQS5XX_REG_ATI_TARGET));
-}
-
-
-uint16_t set_ati_target2(uint16_t value) {
-    return(set_reg16(AZOTEQ_IQS5XX_REG_ATI_TARGET, value));
-}
-
-uint16_t get_ati_target(void) {
-    // return azoteq iqs5xx ati target value. (usualy 100 - 1000)
-    // Error occured: return 0
-    uint8_t read_data[2];
-    uint16_t ati_target;
-    i2c_status_t status;
-    
-    status = i2c_read_register16(AZOTEQ_IQS5XX_ADDRESS, AZOTEQ_IQS5XX_REG_ATI_TARGET, read_data, 2, AZOTEQ_IQS5XX_TIMEOUT_MS);
-    if (status == I2C_STATUS_SUCCESS) {
-        ati_target = read_data[0] << 8 | read_data[1];
-        return(ati_target);
-    } else {
-        dprint("I2C error");
-    }
-    return(0);
-}
-
-uint16_t set_ati_target(uint16_t ati_target){
-    uint8_t reg_data[2];
-    uint16_t current_ati_target;
-    i2c_status_t status;
-
-    current_ati_target = get_ati_target();
-    reg_data[0] = ati_target >> 8;
-    reg_data[1] = (uint8_t) ati_target;
-    status = i2c_write_register16(AZOTEQ_IQS5XX_ADDRESS, AZOTEQ_IQS5XX_REG_ATI_TARGET, reg_data, 2, AZOTEQ_IQS5XX_TIMEOUT_MS);
-    if (status == I2C_STATUS_SUCCESS) {
-        sprintf(debug_str, "ATI Target %d > %d;", current_ati_target, ati_target);
-        dprint(debug_str);
-        return(ati_target);
-    } else {
-        dprint("I2C error");
-    }
-    return(0);
-}
-
-uint8_t get_reg8(uint16_t reg_addr) {
-    uint8_t reg_data[1];
-    i2c_status_t status;
-
-    status = i2c_read_register16(AZOTEQ_IQS5XX_ADDRESS, reg_addr, reg_data, 1, AZOTEQ_IQS5XX_TIMEOUT_MS);
-    if (status == I2C_STATUS_SUCCESS) {
-        return(reg_data[0]);
-    } else {
-        dprint("I2C error");
-    }
-    return(0);
-}
-
-uint8_t set_reg8(uint16_t reg_addr, uint8_t reg_data){
-    uint8_t current_reg_data;
-    i2c_status_t status;
-
-    current_reg_data = get_reg8(reg_addr);
-    status = i2c_write_register16(AZOTEQ_IQS5XX_ADDRESS, reg_addr, &reg_data, 1, AZOTEQ_IQS5XX_TIMEOUT_MS);
-    if (status == I2C_STATUS_SUCCESS) {
-        sprintf(debug_str, "%x:%d > %d;", reg_addr, current_reg_data, reg_data);
-        dprint(debug_str);
-        return(reg_data);
-    } else {
-        dprint("I2C error");
-    }
-    return(0);
-}
-
-uint8_t get_global_ati_c(void) {
-    // return azoteq iqs5xx global ati c
-    // Error occured: return 0
-
-    return(get_reg8(AZOTEQ_IQS5XX_REG_GLOBAL_ATI_C));
-}
-
-uint8_t set_global_ati_c(uint8_t global_ati_c){
-    return(set_reg8(AZOTEQ_IQS5XX_REG_GLOBAL_ATI_C, global_ati_c));
-}
-
-uint8_t get_prox_th(void) {
-    // return azoteq iqs5xx prox threshold.
-    // Error occured: return 0
-    return(get_reg8(AZOTEQ_IQS5XX_REG_PROX_THRESHOLD));
-}
-
-uint8_t set_prox_th(uint8_t prox_th){
-    return(set_reg8(AZOTEQ_IQS5XX_REG_PROX_THRESHOLD, prox_th));
-}
-
-uint8_t get_global_touch_multiplier_set(void){
-    return(get_reg8(AZOTEQ_IQS5XX_REG_GLOBAL_TOUCH_MULTIPLIER_SET));
-}
-
-uint8_t set_global_touch_multiplier_set(uint8_t mul){
-    return(set_reg8(AZOTEQ_IQS5XX_REG_GLOBAL_TOUCH_MULTIPLIER_SET, mul));
-}
-
-uint8_t get_global_touch_multiplier_clear(void){
-    return(get_reg8(AZOTEQ_IQS5XX_REG_GLOBAL_TOUCH_MULTIPLIER_CLEAR));
-}
-
-uint8_t set_global_touch_multiplier_clear(uint8_t mul){
-    return(set_reg8(AZOTEQ_IQS5XX_REG_GLOBAL_TOUCH_MULTIPLIER_CLEAR, mul));
-}
-
-void print_ati_target(void) {
-    uint8_t reg_data[2];
-    uint8_t global_ati_c;
-    uint16_t ati_target;
-    i2c_status_t status;
-
-    status = i2c_read_register16(AZOTEQ_IQS5XX_ADDRESS, AZOTEQ_IQS5XX_REG_GLOBAL_ATI_C, reg_data, 1, AZOTEQ_IQS5XX_TIMEOUT_MS);
-    if (status == I2C_STATUS_SUCCESS) {
-        global_ati_c = reg_data[0];
-        sprintf(debug_str, "Global ATI C %d;", global_ati_c);
-        SEND_STRING(debug_str);
-        dprint(debug_str);
-    } else {
-        dprint("I2C error");
-    }
-    
-    status = i2c_read_register16(AZOTEQ_IQS5XX_ADDRESS, AZOTEQ_IQS5XX_REG_ATI_TARGET, reg_data, 2, AZOTEQ_IQS5XX_TIMEOUT_MS);
-    if (status == I2C_STATUS_SUCCESS) {
-        ati_target = reg_data[0] << 8 | reg_data[1];
-        sprintf(debug_str, "ATI Target %d;", ati_target);
-        SEND_STRING(debug_str);
-        dprint(debug_str);
-    } else {
-        dprint("I2C error");
-    }
-    return;
-}    
-
-void print_iqs5xx_config(void) {
-    uint16_t ati_target;
-    uint8_t global_ati_c;
-    uint8_t prox_th;
-    uint8_t global_touch_multiplier_set;
-    uint8_t global_touch_multiplier_clear;
-    
-    global_ati_c = get_global_ati_c();
-    sprintf(debug_str, "Global ATI C %d;", global_ati_c);
-    SEND_STRING(debug_str);
-    wait_ms(10);
-    dprint(debug_str);
-    if (global_ati_c == 0) {
-        dprint("I2C error (maybe...)");
-    }
-
-    ati_target = get_ati_target2();
-    sprintf(debug_str, "Global ATI Target %d;", ati_target);
-    SEND_STRING(debug_str);
-    wait_ms(10);
-    dprint(debug_str);
-    if (ati_target == 0) {
-        dprint("I2C error (maybe...)");
-    }
-
-    prox_th = get_prox_th();
-    sprintf(debug_str, "Prox Th %d;", prox_th);
-    SEND_STRING(debug_str);
-    wait_ms(10);
-    dprint(debug_str);
-    if (global_ati_c == 0) {
-        dprint("I2C error (maybe...)");
-    }
-    global_touch_multiplier_set = get_global_touch_multiplier_set();
-    sprintf(debug_str, "Global Touch Multiplier - Set %d;", global_touch_multiplier_set);
-    SEND_STRING(debug_str);
-    wait_ms(10);            
-    dprint(debug_str);
-    if (global_ati_c == 0) {
-        dprint("I2C error (maybe...)");
-    }
-
-    global_touch_multiplier_clear = get_global_touch_multiplier_clear();
-    sprintf(debug_str, "Global Touch Multiplier - clear %d;", global_touch_multiplier_clear);
-    SEND_STRING(debug_str);
-    wait_ms(10);
-    dprint(debug_str);
-    if (global_ati_c == 0) {
-        dprint("I2C error (maybe...)");
-    }
-
-    sprintf(debug_str, "t:%d;df:%d,%d,%d;", get_reg8(0x0011), get_reg8(0x0637), get_reg8(0x0638), get_reg16(0x0639));
-    SEND_STRING(debug_str);
-    wait_ms(10);
-    dprint(debug_str);
-    return;
-}    
-
-uint16_t dump_reg(uint16_t start_addr, uint16_t end_addr) {
-    uint8_t reg_value;
-    uint16_t addr;
-    //    i2c_status_t status;
-    //    sprintf(debug_str, "\naddr 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F");
-    //    SEND_STRING(debug_str);
-    //    wait_ms(10);
-    for (addr = start_addr; addr <= end_addr; addr++) {
-        if ((addr == start_addr) || ((addr & 0x000f) == 0)) {
-            sprintf(debug_str, "\n%04X: ", addr);
-            SEND_STRING(debug_str);
-            wait_ms(10);
-        }
-        reg_value = get_reg8(addr);
-        sprintf(debug_str, "%02X ", reg_value);
-        SEND_STRING(debug_str);
-        wait_ms(10);
-    }
-    return(addr);
-}
 
 // for pseudo control (Emacs like cursor movement) functions
 bool process_pseudo_control(uint16_t keycode, keyrecord_t *record) {
@@ -703,7 +219,6 @@ bool process_cc_spc_lower(uint16_t keycode, keyrecord_t *record) {
     return(false); // handled.
 }
 
-
 void print_keymap(void){
     sprintf(debug_str, "TG(_CURSOR),CC_USUS,CC_USJP,CC_CTL_INV,TG(_TENKEY),CC_TBUP,CC_TBDWN,KC_7,KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  CC_PR1,CC_PCB1,CC_TW1\n");
     SEND_STRING(debug_str);
@@ -739,6 +254,7 @@ void keyboard_post_init_user(void) {
   rgblight_mode((uint8_t)(RGB_MODE_BREATHE));
   rgblight_sethsv(HSV_CYAN);
 
+#ifdef AZOTEQ_IQS5XX_TPS43
   // TPS43
   // default:
   // Global ATI C 1;Global ATI Target 700;Prox Th 23;Global Touch Multiplier - Set 16;Global Touch Multiplier - clear 12;t:0;df:7,6,250;
@@ -747,6 +263,7 @@ void keyboard_post_init_user(void) {
   set_global_touch_multiplier_set(12);
   //Global Touch Multiplier - clear: 12 -> 8
   set_global_touch_multiplier_clear(8);
+#endif
 }
 
 // Scrolling
@@ -830,14 +347,17 @@ report_mouse_t two_fingers_scroll(report_mouse_t mouse_report) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    uint8_t rows;
+    static uint8_t rc2, rc3;
+    uint32_t c_time, l_time;
+
+#ifdef AZOTEQ_IQS5XX_TPS43
     uint16_t ati_target;
     uint8_t global_ati_c;
     uint8_t prox_th;
     uint8_t global_touch_multiplier_set;
     uint8_t global_touch_multiplier_clear;
-    uint8_t rows;
-    uint32_t c_time, l_time;
-    static uint8_t rc2, rc3;
+#endif
     
   // If console is enabled, it will print the matrix position and status of each key pressed
 #ifdef CONSOLE_ENABLE
@@ -902,6 +422,70 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case CC_T3:
         if (record->event.pressed) {
             l_time = timer_read();
+            rc3 = 0; // Grave ESC mode
+            while ((c_time = (abs(timer_read() - l_time))) < 100) {
+                // check the touch wall status.
+                rows =readMatrixCol(15);
+                if (rows == 0) {
+                    sprintf(debug_str, "%ld", c_time);
+                    dprintf(debug_str);
+                    layer_on(_CURSOR);
+                    rgblight_mode((uint8_t)(RGBLIGHT_MODE_STATIC_LIGHT));
+                    rgblight_sethsv(HSV_GOLDENROD);
+                    rc3 = 1; // cursor mode
+                    return(false);
+                }
+            }
+            if (rc3 == 0) {
+                if (kb_mode & (1 << M_USJP)) { // US-JP mode
+                    if (get_mods() & MOD_MASK_ALT) {
+                        // A shift key or a alt key is pressed.
+                        register_code(KC_GRV); // Grave(JP_ZKHK) + ALT -> Kana / Kanji Toggle.
+                    } else {
+                        if (get_mods() & MOD_MASK_SHIFT) {
+                            // A shift key or a alt key is pressed.
+                            register_code(KC_EQL); // JP_CIRC (= KC_EQL) + shift -> JP_TILD
+                        } else {
+                            register_code(KC_ESC);
+                        }
+                    }
+                } else { //US-US mode
+                    if (get_mods() & (MOD_MASK_SHIFT | MOD_MASK_ALT)) {
+                        // A shift key or a alt key is pressed.
+                        register_code(KC_GRV);
+                    } else {
+                        register_code(KC_ESC);
+                    }
+                }
+            }
+        } else { // not pressed.
+            if (rc3 == 0) { // Grave ESC mode
+                if (kb_mode & (1 << M_USJP)) { // US-JP mode
+                    if (get_mods() & MOD_MASK_ALT) {
+                        // A shift key or a alt key is pressed.
+                        unregister_code(KC_GRV);
+                    } else {
+                        if (get_mods() & MOD_MASK_SHIFT) {
+                            // A shift key or a alt key is pressed.
+                            unregister_code(KC_EQL); // JP_CIRC (= KC_EQL) + shift -> JP_TILD
+                        } else {
+                            unregister_code(KC_ESC);
+                        }
+                    }
+                } else { // US-US mode
+                    if (get_mods() & (MOD_MASK_SHIFT | MOD_MASK_ALT)) {
+                        // A shift key or a alt key is pressed.
+                        unregister_code(KC_GRV);
+                    } else {
+                        unregister_code(KC_ESC);
+                    }
+                }
+            }
+        }
+        return(false);
+        /*        
+        if (record->event.pressed) {
+            l_time = timer_read();
             rc3 = 0; // QK_GESC
             while ((c_time = (abs(timer_read() - l_time))) < 100) {
                     rows =readMatrixCol(15);
@@ -922,13 +506,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
         }
         return(false);
+        */
         
     case CC_TW1:
         // The left keys with touch sensors (or the touch wall) is on.
         if (record->event.pressed) {
             my_modifier = my_modifier | 1 << MM_TW;
+            rgblight_mode((uint8_t)(RGBLIGHT_MODE_STATIC_LIGHT));
+            rgblight_sethsv(HSV_ORANGE);
         } else {
             my_modifier = my_modifier & ~(1 << MM_TW);
+            rgblight_sethsv(HSV_CYAN);
+            rgblight_mode((uint8_t)(RGB_MODE_BREATHE));
         }
         return false;
         
@@ -954,9 +543,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             my_modifier = my_modifier & ~(1 << MM_PCB);
             // unregister_code(KC_P);
             layer_off(_TCURSOR);
-            rgblight_mode((uint8_t)(RGBLIGHT_MODE_STATIC_LIGHT));
+            //            rgblight_mode((uint8_t)(RGBLIGHT_MODE_STATIC_LIGHT));
             rgblight_sethsv(HSV_CYAN);
-
+            rgblight_mode((uint8_t)(RGB_MODE_BREATHE));
         }
         return false;
         
@@ -995,11 +584,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if ((kb_mode & (1 << M_PCTL_INV)) >= 1) {
                 // rgblight_mode((uint8_t)(RGBLIGHT_MODE_RAINBOW_MOOD));
                 rgblight_mode((uint8_t)(RGBLIGHT_MODE_STATIC_LIGHT));
-                    rgblight_sethsv(HSV_YELLOW);
+                rgblight_sethsv(HSV_PURPLE);
                 } else {
                 // rgblight_mode((uint8_t)(RGBLIGHT_MODE_BREATHING));
                 rgblight_mode((uint8_t)(RGBLIGHT_MODE_STATIC_LIGHT));
-                    rgblight_sethsv(HSV_RED);
+                rgblight_sethsv(HSV_TURQUOISE);
                 }
             dprint(debug_str);
             return false; // Do not let QMK process the keycode further
@@ -1050,8 +639,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 SEND_STRING("CURSOR_ON;");
                 wait_ms(10);
             }
+#ifdef AZOTEQ_IQS5XX_TPS43
             print_iqs5xx_config();
-            print_keymap();
+#endif
+            // print_keymap();
             return false;
         }
         return true;
@@ -1081,6 +672,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             // for vi cursor mode
             if (record->event.pressed) {
                 layer_on(_CURSOR);
+                rgblight_mode((uint8_t)(RGBLIGHT_MODE_STATIC_LIGHT));
+                rgblight_sethsv(HSV_GOLDENROD);
                 uprint("CURSOR");
             }
             return false;
@@ -1103,6 +696,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // Else, let QMK process the KC_ESC keycode as usual
         return true;
 
+#ifdef AZOTEQ_IQS5XX_TPS43
     case CC_ATTUP:
         // IQS5xx ATI Target Up.
         if (record->event.pressed) {
@@ -1223,12 +817,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             dump_reg(0x062e, 0x06cf);
         }
         return true;
-
+#endif
     }
     return true;
 }
 
 report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
+#ifdef AZOTEQ_IQS5XX_TPS43
     static uint32_t c_time;
     uint8_t reg_value;
 
@@ -1252,5 +847,6 @@ report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
         mouse_report.buttons = 0; // suppress buttons when scrolling.
         return(mouse_report);
     }
+#endif
     return(mouse_report);
 }
