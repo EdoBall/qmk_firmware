@@ -2,7 +2,7 @@
 
 *A short description of the keyboard/project*
 
-* Keyboard Maintainer: [Edo Ball](https://github.com/Edo Ball)
+* Keyboard Maintainer: [Edo Ball](https://github.com/EdoBall)
 * Hardware Supported: *The PCBs, controllers supported*
 * Hardware Availability: *Links to where you can find this hardware*
 

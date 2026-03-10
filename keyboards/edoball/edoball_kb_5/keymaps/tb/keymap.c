@@ -128,7 +128,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    KC_LCTL, _______, KC_LGUI, KC_LALT, KC_SPC, KC_ENT,   KC_INT4, KC_SPC,  KC_BSPC, KC_RALT, KC_LEFT,  CC_ADJUST, KC_DEL, KC_NO, KC_NO, KC_NO \
                                                                         ), \
     [_ADJUST] = LAYOUT_ortho_16x5(                                       \
-   TG(_CURSOR),CC_USUS,CC_USJP,CC_CTL_INV,TG(_TENKEY),CC_TBUP,CC_TBDWN,KC_7,KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  CC_PR1,CC_PCB1,CC_TW1, \
+   CC_CTL_INV,CC_USUS,CC_USJP,TG(_CURSOR),TG(_TENKEY),CC_TBUP,CC_TBDWN,KC_7,KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  CC_PR1,CC_PCB1,CC_TW1, \
    CC_INFO,CC_ATTDN,CC_ATTUP,CC_TMSDN,CC_TMSUP,    KC_T,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_NO, KC_NO, KC_NO, \
    CC_DUMP,CC_GACDN,CC_GACUP,CC_TMCDN,CC_TMCUP,    KC_G,  KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,  KC_NO, KC_NO, KC_NO, \
    KC_LSFT,CC_PRXDN,CC_PRXUP,_______,_______,      KC_B,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT, KC_BSLS,KC_NO, KC_NO, KC_NO, \
@@ -426,6 +426,68 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case CC_T3:
         if (record->event.pressed) {
             l_time = timer_read();
+            rc3 = 0; // Grave ESC mode
+            while ((c_time = (abs(timer_read() - l_time))) < 100) {
+                // check the touch wall status.
+                rows =readMatrixCol(15);
+                if (rows == 0) {
+                    sprintf(debug_str, "%ld", c_time);
+                    dprintf(debug_str);
+                    layer_on(_CURSOR);
+                    rc3 = 1; // cursor mode
+                    return(false);
+                }
+            }
+            if (rc3 == 0) {
+                if (kb_mode & (1 << M_USJP)) { // US-JP mode
+                    if (get_mods() & MOD_MASK_ALT) {
+                        // A shift key or a alt key is pressed.
+                        register_code(KC_GRV); // Grave(JP_ZKHK) + ALT -> Kana / Kanji Toggle.
+                    } else {
+                        if (get_mods() & MOD_MASK_SHIFT) {
+                            // A shift key or a alt key is pressed.
+                            register_code(KC_EQL); // JP_CIRC (= KC_EQL) + shift -> JP_TILD
+                        } else {
+                            register_code(KC_ESC);
+                        }
+                    }
+                } else { //US-US mode
+                    if (get_mods() & (MOD_MASK_SHIFT | MOD_MASK_ALT)) {
+                        // A shift key or a alt key is pressed.
+                        register_code(KC_GRV);
+                    } else {
+                        register_code(KC_ESC);
+                    }
+                }
+            }
+        } else { // not pressed.
+            if (rc3 == 0) { // Grave ESC mode
+                if (kb_mode & (1 << M_USJP)) { // US-JP mode
+                    if (get_mods() & MOD_MASK_ALT) {
+                        // A shift key or a alt key is pressed.
+                        unregister_code(KC_GRV);
+                    } else {
+                        if (get_mods() & MOD_MASK_SHIFT) {
+                            // A shift key or a alt key is pressed.
+                            unregister_code(KC_EQL); // JP_CIRC (= KC_EQL) + shift -> JP_TILD
+                        } else {
+                            unregister_code(KC_ESC);
+                        }
+                    }
+                } else { // US-US mode
+                    if (get_mods() & (MOD_MASK_SHIFT | MOD_MASK_ALT)) {
+                        // A shift key or a alt key is pressed.
+                        unregister_code(KC_GRV);
+                    } else {
+                        unregister_code(KC_ESC);
+                    }
+                }
+            }
+        }
+        return(false);
+        /*        
+        if (record->event.pressed) {
+            l_time = timer_read();
             rc3 = 0; // QK_GESC
             while ((c_time = (abs(timer_read() - l_time))) < 100) {
                     rows =readMatrixCol(15);
@@ -446,6 +508,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
         }
         return(false);
+        */
         
     case CC_TW1:
         // The left keys with touch sensors (or the touch wall) is on.
@@ -519,11 +582,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if ((kb_mode & (1 << M_PCTL_INV)) >= 1) {
                 // rgblight_mode((uint8_t)(RGBLIGHT_MODE_RAINBOW_MOOD));
                 rgblight_mode((uint8_t)(RGBLIGHT_MODE_STATIC_LIGHT));
-                    rgblight_sethsv(HSV_YELLOW);
+                rgblight_sethsv(HSV_RED);
                 } else {
                 // rgblight_mode((uint8_t)(RGBLIGHT_MODE_BREATHING));
                 rgblight_mode((uint8_t)(RGBLIGHT_MODE_STATIC_LIGHT));
-                    rgblight_sethsv(HSV_RED);
+                rgblight_sethsv(HSV_YELLOW);
                 }
             dprint(debug_str);
             return false; // Do not let QMK process the keycode further
