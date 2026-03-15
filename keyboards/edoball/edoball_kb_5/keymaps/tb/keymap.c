@@ -11,23 +11,10 @@
 
 #define DEBUG
 
-// Todo:  hogehoge.hでなるべくextern宣言をしないですむように関数を変更。
-// TPS43 が接続されていなくても動くようにする。
-
 static uint16_t kb_mode = 1 << M_USUS;
 static char debug_str[256];
 
 uint8_t readMatrixCol(uint8_t col_index);
-
-/*
-static uint8_t cursor_kc[][2] =
-    {{KC_UP, KC_P},
-     {KC_DOWN, KC_N},
-     {KC_LEFT, KC_B},
-     {KC_RIGHT, KC_F},
-     {KC_PGUP, KC_NO},
-     {KC_PGDN, KC_V}};
-*/
 
 // My Key Modifiers:
 // 0: Pseudo Control, 1: Pseudo Alt, 2: Pseudo GUI, 3: Palm Rest, 4: PCB1, 5: Touch wall 1,
@@ -38,7 +25,6 @@ static uint8_t cursor_kc[][2] =
 #define MM_PCB 4
 #define MM_TW 5
 
-
 // scroll
 #define SCRL_MAG 0.02
 #define SCRL_MAG_TWO_FINGERS 0.02
@@ -46,7 +32,6 @@ static uint8_t my_modifier = 0;
 #ifdef AZOTEQ_IQS5XX_TPS43
 static bool scroll_flag = false;
 #endif
-
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
